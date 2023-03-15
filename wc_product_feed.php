@@ -1,6 +1,6 @@
 // Add custom feed
 function wc_product_feed() {
-    add_feed('fb_product_feed', 'wc_product_feed_callback');
+    add_feed('wc_product_feed', 'wc_product_feed_callback');
 }
 
 function wc_product_feed_callback() {
@@ -14,8 +14,8 @@ function wc_product_feed_callback() {
 
     $output = '<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">';
     $output .= '<channel>';
-    $output .= '<title>PSB Speakers</title>';
-    $output .= '<link>https://www.psbspeakers.com</link>';
+    $output .= '<title>Your Page Title</title>';
+    $output .= '<link>https://www.yoursite.com</link>';
     
     foreach ( $products as $product ) {
 
