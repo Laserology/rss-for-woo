@@ -49,15 +49,15 @@ function wc_product_feed_callback() {
                         break;
                 }
                 $short_description = strip_tags($product->post_excerpt);
-        $long_description = strip_tags($product->post_content);
-        $description = $short_description !== '' ? $short_description : $long_description;
+                $long_description = strip_tags($product->post_content);
+                $description = $short_description !== '' ? $short_description : $long_description;
 
-        $output .= '<item>';
-        $output .= '<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>';
-        $output .= '<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>';
-        $output .= '<g:title>' . $product->post_title . '</g:title>';
-        $output .= '<g:description><![CDATA[' . $description . ']]></g:description>';
-        $output .= '<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>';
+                $output .= '<item>';
+                $output .= '<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>';
+                $output .= '<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>';
+                $output .= '<g:title>' . $product->post_title . '</g:title>';
+                $output .= '<g:description><![CDATA[' . $description . ']]></g:description>';
+                $output .= '<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>';
 
                 $stock = $variation_obj->get_stock_status();
                 $stock_status = $stock == 'instock' ? 'In stock' : 'Out of stock';
@@ -70,9 +70,9 @@ function wc_product_feed_callback() {
                 $output .= '<g:availability>' . $stock_status . '</g:availability>';
                 $output .= '<g:sku>' . $variation_obj->get_sku() . '</g:sku>';
                 $output .= '<g:condition>New</g:condition>';
-        $output .= '<g:brand>$variation_obj->get_brand()</g:brand>';
-        $output .= '<g:google_product_category>223</g:google_product_category>';
-        $output .= '</item>';
+                $output .= '<g:brand>$variation_obj->get_brand()</g:brand>';
+                $output .= '<g:google_product_category>223</g:google_product_category>';
+                $output .= '</item>';
                
             }
         } 
