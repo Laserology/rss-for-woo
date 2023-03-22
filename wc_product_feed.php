@@ -26,7 +26,9 @@ function wc_product_feed_callback() {
         if ( $product_obj->is_type( 'variable' ) ) {
             foreach ( $product_obj->get_available_variations() as $variation ) {
                 $variation_obj = new WC_Product_Variation( $variation['variation_id'] );
-               
+                
+                //Use this section if you use region/currency variations on your products
+        
                 $currency = $variation_obj->get_attribute( 'pa_region' );
                 
                 switch ($currency) {
