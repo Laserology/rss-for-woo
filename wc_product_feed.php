@@ -1,6 +1,6 @@
 <?php /*
     Plugin Name: Woo Product Feed
-    Plugin URI: https://github.com/Laserology/woocommerce_xml_product_feed/
+    Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
     Description: Free public XML export utility for WooCommerce
     Version: 1
     Author: Laserology, vladjpuscasu
@@ -23,12 +23,8 @@ function wc_product_feed_callback() {
 
     $output = '<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">';
     $output .= '<channel>';
-    $output .= '<title>Laserology Store</title>';
-    $output .= '<link>https://laserology.net/</link>';
     
     foreach ( $products as $product ) {
-
-        
 
         $product_obj = wc_get_product( $product->ID );
 
@@ -85,7 +81,6 @@ function wc_product_feed_callback() {
                
             }
         } 
-        
     }
 
     $output .= '</channel>';
