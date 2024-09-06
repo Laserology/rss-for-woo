@@ -23,8 +23,8 @@ function wc_product_feed_callback() {
 
     $output = '<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">';
     $output .= '<channel>';
-    $output .= '<title>Your Page Title</title>';
-    $output .= '<link>https://www.yoursite.com</link>';
+    $output .= '<title>Laserology Store</title>';
+    $output .= '<link>https://laserology.net/</link>';
     
     foreach ( $products as $product ) {
 
