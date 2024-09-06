@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: laserology
-Tags: woo, product feed, google marketplace, rss, rss feed, xml feed
+Tags: woo, product feed, google marketplace, rss, rss feed
 Requires at least: 4.7
 Tested up to: 6.6.1
 Stable tag: 1.0
