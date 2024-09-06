@@ -4,7 +4,7 @@
     Description: Free public XML export utility for WooCommerce
     Version: 1
     Author: Laserology, vladjpuscasu
-    Author URI: http://laserology.net/
+    Author URI: https://laserology.net/
 */
 
 // Add custom feed
