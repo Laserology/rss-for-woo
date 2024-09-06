@@ -1,4 +1,13 @@
-# woocommerce_xml_product_feed
+# WooCommerce Product Feed
 Creates a WooCommerce product feed url in the XML format that can be used to upload a catalog stream to your Google Merchant Center catalog or Facebook Shop catalog. This includes regional variations and color variations of products. 
-You can use this in your functions.php file. 
-To get the url stream, use yourwebsite.com/?feed=wc_product_feed
+
+# Install
+Here is how you install the plugin:
+- Click 'Code'
+- Click 'Download as .ZIP'
+- Go to your wordpress plugins page
+- Click 'Add new plugin'
+- Click 'Upload'
+- Upload the file you downloaded from here
+- Activate
+- Done.
