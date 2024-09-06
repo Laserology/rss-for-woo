@@ -1,3 +1,12 @@
+<?php /*
+    Plugin Name: Woo Product Feed
+    Plugin URI: https://github.com/Laserology/woocommerce_xml_product_feed/
+    Description: Free public XML export utility for WooCommerce
+    Version: 1
+    Author: Laserology, vladjpuscasu
+    Author URI: http://laserology.net/
+*/
+
 // Add custom feed
 function wc_product_feed() {
     add_feed('wc_product_feed', 'wc_product_feed_callback');
