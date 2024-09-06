@@ -15,3 +15,9 @@ Here is how you install the plugin:
 # Usage
 To take advantage of this plugin, simply append ``/?feed=wc_product_feed`` to your url, like so:
 ``https://laserology.net/?feed=wc_product_feed``
+
+# This is a fork!
+This plugin originated from [here](https://github.com/vladjpuscasu/woocommerce_xml_product_feed), i have forked it and made it much more user friendly and plan to keep it up to date for the forseeable future.
+
+# License
+This project is licensed under the GPLv2 license.
