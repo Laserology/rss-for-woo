@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== RSS feed for Woo ===
 Contributors: laserology
 Tags: woo, product feed, google marketplace, rss, rss feed
 Requires at least: 4.7
