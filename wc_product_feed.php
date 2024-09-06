@@ -54,8 +54,8 @@ function wc_product_feed_callback() {
                         $currency = '';
                         break;
                 }
-                $short_description = strip_tags($product->post_excerpt);
-                $long_description = strip_tags($product->post_content);
+                $short_description = wp_strip_all_tags($product->post_excerpt);
+                $long_description = wp_strip_all_tags($product->post_content);
                 $description = $short_description !== '' ? $short_description : $long_description;
 
                 $output .= '<item>';
@@ -87,7 +87,7 @@ function wc_product_feed_callback() {
     $output .= '</channel>';
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
-    echo $output;
+    <p><?php echo esc_html( $output ); ?></p>
     exit;
 }
 
