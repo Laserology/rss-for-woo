@@ -11,3 +11,7 @@ Here is how you install the plugin:
 - Upload the file you downloaded from here
 - Activate
 - Done.
+
+# Usage
+To take advantage of this plugin, simply append ``/?feed=wc_product_feed`` to your url, like so:
+``https://laserology.net/?feed=wc_product_feed``
