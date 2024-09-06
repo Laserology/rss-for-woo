@@ -1,7 +1,7 @@
 <?php /*
-    Plugin Name: Woo Product Feed
+    Plugin Name: RSS feed for Woo
     Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
-    Description: Free public XML export utility for WooCommerce
+    Description: Free public XML/RSS feed for your woo store.
     License: GPL v2 or later
     Version: 1
     Author: Laserology, vladjpuscasu
