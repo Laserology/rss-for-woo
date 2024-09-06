@@ -1,15 +1,5 @@
 # RSS Product feed for Woo!
 
-=== RSS Product feed for Woo ===
-Contributors: laserology
-Tags: woo, store, rss, xml, rss feed, store feed, pinterest, google marketplace
-Requires at least: 4.7
-Tested up to: 6.6.1
-Stable tag: 4.3
-Requires PHP: 7.0
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
-
 Creates a Woo product feed url in the XML format that can be used to upload a catalog stream to your Google Merchant Center catalog or Facebook Shop catalog. This includes regional variations and color variations of products.
 
 == Description ==
