@@ -87,7 +87,7 @@ function wc_product_feed_callback() {
     $output .= '</channel>';
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
-    <p><?php echo esc_html( $output ); ?></p>
+    echo esc_html( $output );
     exit;
 }
 
