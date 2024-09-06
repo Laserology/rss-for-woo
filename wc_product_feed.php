@@ -76,7 +76,6 @@ function wc_product_feed_callback() {
                 $output .= '<g:availability>' . $stock_status . '</g:availability>';
                 $output .= '<g:sku>' . $variation_obj->get_sku() . '</g:sku>';
                 $output .= '<g:condition>New</g:condition>';
-                $output .= '<g:brand>$variation_obj->get_brand()</g:brand>';
                 $output .= '<g:google_product_category>223</g:google_product_category>';
                 $output .= '</item>';
                
