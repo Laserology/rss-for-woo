@@ -8,6 +8,22 @@
     Author URI: https://laserology.net/
 */
 
+// Add quick link to view the feed generated.
+function setup_view_feed_link( $links ) {
+	// Build and escape the URL.
+	$url = esc_url(
+	    get_site_url() . "?feed=wc_product_feed"
+	);
+	// Create the link.
+	$settings_link = "<a href='$url'>" . __( 'View feed' ) . '</a>';
+	// Adds the link to the end of the array.
+	array_push(
+		$links,
+		$settings_link
+	);
+	return $links;
+}
+
 // Add custom feed
 function wc_product_feed() {
     add_feed('wc_product_feed', 'wc_product_feed_callback');
@@ -90,4 +106,5 @@ function wc_product_feed_callback() {
     exit;
 }
 
+add_filter( 'plugin_action_links_rss-for-woo-main/wc_product_feed.php', 'setup_view_feed_link' );
 add_action( 'init', 'wc_product_feed' );
