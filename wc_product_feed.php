@@ -6,6 +6,7 @@
     Version: 1.0
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
+    Requires Plugins: woocommerce
 */
 
 // Add quick link to view the feed generated.
