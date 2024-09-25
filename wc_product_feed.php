@@ -39,9 +39,9 @@ function wc_product_feed_callback() {
     $products = get_posts( $args );
 
 
-    $output = '<?xml version="1.0"?>\n';
-    $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">\n';
-    $output .= '	<channel>\n';
+    $output = '<?xml version="1.0"?>' . "\r\n";
+    $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . "\r\n";
+    $output .= '	<channel>' . "\r\n";
     
     foreach ( $products as $product ) {
 
@@ -79,28 +79,28 @@ function wc_product_feed_callback() {
                 $stock_status = $stock == 'instock' ? 'In stock' : 'Out of stock';
                 $stock = $variation_obj->get_stock_status();
 
-                $output .= '		<item>\n';
-                $output .= '			<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>\n';
-                $output .= '			<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>\n';
-                $output .= '			<g:title>' . $product->post_title . '</g:title>\n';
-                $output .= '			<g:description><![CDATA[' . $description . ']]></g:description>\n';
-                $output .= '			<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>\n';
-                $output .= '			<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>\n';
+                $output .= '		<item>' . "\r\n";
+                $output .= '			<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>' . "\r\n";
+                $output .= '			<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>' . "\r\n";
+                $output .= '			<g:title>' . $product->post_title . '</g:title>' . "\r\n";
+                $output .= '			<g:description><![CDATA[' . $description . ']]></g:description>' . "\r\n";
+                $output .= '			<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>' . "\r\n";
+                $output .= '			<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . "\r\n";
                 $output .= '			<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>';
-                $output .= '			<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>\n';
-                $output .= '			<g:price>' . $variation_obj->get_price() . ' ' . $currency . '</g:price>\n';
-                $output .= '			<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>\n';
-                $output .= '			<g:availability>' . $stock_status . '</g:availability>\n';
-                $output .= '			<g:sku>' . $variation_obj->get_sku() . '</g:sku>\n';
-                $output .= '			<g:condition>New</g:condition>\n';
-                $output .= '			<g:google_product_category>223</g:google_product_category>\n';
-                $output .= '		</item>\n';
+                $output .= '			<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>' . "\r\n";
+                $output .= '			<g:price>' . $variation_obj->get_price() . ' ' . $currency . '</g:price>' . "\r\n";
+                $output .= '			<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>' . "\r\n";
+                $output .= '			<g:availability>' . $stock_status . '</g:availability>' . "\r\n";
+                $output .= '			<g:sku>' . $variation_obj->get_sku() . '</g:sku>' . "\r\n";
+                $output .= '			<g:condition>New</g:condition>' . "\r\n";
+                $output .= '			<g:google_product_category>223</g:google_product_category>' . "\r\n";
+                $output .= '		</item>' . "\r\n";
                
             }
         } 
     }
 
-    $output .= '	</channel>\n';
+    $output .= '	</channel>' . "\r\n";
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
     echo $output;
