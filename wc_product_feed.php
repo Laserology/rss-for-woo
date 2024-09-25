@@ -86,7 +86,7 @@ function wc_product_feed_callback() {
                 $output .= '			<g:description><![CDATA[' . $description . ']]></g:description>' . "\r\n";
                 $output .= '			<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>' . "\r\n";
                 $output .= '			<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . "\r\n";
-                $output .= '			<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>';
+                $output .= '			<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>' . "\r\n";
                 $output .= '			<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>' . "\r\n";
                 $output .= '			<g:price>' . $variation_obj->get_price() . ' ' . $currency . '</g:price>' . "\r\n";
                 $output .= '			<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>' . "\r\n";
