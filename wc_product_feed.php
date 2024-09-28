@@ -10,10 +10,10 @@
 */
 
 // Add quick link to view the feed generated.
-function setup_view_feed_link( $links ) {
+function LSWCF_setup_view_feed_link( $links ) {
 	// Build and escape the URL.
 	$url = esc_url(
-	    get_site_url() . "?feed=wc_product_feed"
+	    get_site_url() . "?feed=products"
 	);
 	// Create the link.
 	$settings_link = "<a href='$url'>" . __( 'View feed' ) . '</a>';
@@ -26,11 +26,11 @@ function setup_view_feed_link( $links ) {
 }
 
 // Add custom feed
-function wc_product_feed() {
-    add_feed('wc_product_feed', 'wc_product_feed_callback');
+function LSWCF_product_feed() {
+    add_feed('products', 'LSWCF_product_feed_callback');
 }
 
-function wc_product_feed_callback() {
+function LSWCF_product_feed_callback() {
     $args = array(
         'post_type'      => 'product',
         'post_status'    => 'publish',
@@ -38,13 +38,11 @@ function wc_product_feed_callback() {
     );
     $products = get_posts( $args );
 
-
     $output = '<?xml version="1.0"?>' . "\r\n";
     $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . "\r\n";
     $output .= '	<channel>' . "\r\n";
     
     foreach ( $products as $product ) {
-
         $product_obj = wc_get_product( $product->ID );
 
         if ( $product_obj->is_type( 'variable' ) ) {
@@ -52,7 +50,6 @@ function wc_product_feed_callback() {
                 $variation_obj = new WC_Product_Variation( $variation['variation_id'] );
                 
                 //Use this section if you use region/currency variations on your products
-        
                 $currency = $variation_obj->get_attribute( 'pa_region' );
                 
                 switch ($currency) {
@@ -72,6 +69,7 @@ function wc_product_feed_callback() {
                         $currency = '';
                         break;
                 }
+
                 $short_description = wp_strip_all_tags($product->post_excerpt);
                 $long_description = wp_strip_all_tags($product->post_content);
                 $description = $short_description !== '' ? $short_description : $long_description;
@@ -95,7 +93,6 @@ function wc_product_feed_callback() {
                 $output .= '			<g:condition>New</g:condition>' . "\r\n";
                 $output .= '			<g:google_product_category>223</g:google_product_category>' . "\r\n";
                 $output .= '		</item>' . "\r\n";
-               
             }
         } 
     }
@@ -107,5 +104,5 @@ function wc_product_feed_callback() {
     exit;
 }
 
-add_filter( 'plugin_action_links_rss-for-woo-main/wc_product_feed.php', 'setup_view_feed_link' );
-add_action( 'init', 'wc_product_feed' );
+add_filter( 'plugin_action_links_rss-for-woo-main/LSWCF_product_feed.php', 'LSWCF_setup_view_feed_link' );
+add_action( 'init', 'LSWCF_product_feed' );
