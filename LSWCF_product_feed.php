@@ -3,7 +3,7 @@
     Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
     Description: Free public XML/RSS feed for your woo store.
     License: GPL v2 or later
-    Version: 1.0
+    Version: 1.1
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
     Requires Plugins: woocommerce
@@ -38,9 +38,9 @@ function LSWCF_product_feed_callback() {
     );
     $products = get_posts( $args );
 
-    $output = '<?xml version="1.0"?>' . "\r\n";
-    $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . "\r\n";
-    $output .= '	<channel>' . "\r\n";
+    $output = '<?xml version="1.0"?>' . PHP_EOL;
+    $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
+    $output .= '\t<channel>' . PHP_EOL;
     
     foreach ( $products as $product ) {
         $product_obj = wc_get_product( $product->ID );
@@ -54,20 +54,24 @@ function LSWCF_product_feed_callback() {
                 
                 switch ($currency) {
                     case 'US':
-                        $currency = 'USD';
+                        $currency = ' USD';
                         break;
                     case 'CA':
-                        $currency = 'CAD';
+                        $currency = ' CAD';
                         break;
                     case 'EU':
-                        $currency = 'EUR';
+                        $currency = ' EUR';
                         break;
                     case 'GB':
-                        $currency = 'GBP';
+                        $currency = ' GBP';
                         break;
                     case 'ZZ':
-                        $currency = '';
+                        $currency = ' ';
                         break;
+		    default:
+			// Default to USD if it doesn't exist in the list
+			$currency = ' USD';
+			break;
                 }
 
                 $short_description = wp_strip_all_tags($product->post_excerpt);
@@ -77,27 +81,27 @@ function LSWCF_product_feed_callback() {
                 $stock_status = $stock == 'instock' ? 'In stock' : 'Out of stock';
                 $stock = $variation_obj->get_stock_status();
 
-                $output .= '		<item>' . "\r\n";
-                $output .= '			<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>' . "\r\n";
-                $output .= '			<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>' . "\r\n";
-                $output .= '			<g:title>' . $product->post_title . '</g:title>' . "\r\n";
-                $output .= '			<g:description><![CDATA[' . $description . ']]></g:description>' . "\r\n";
-                $output .= '			<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>' . "\r\n";
-                $output .= '			<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . "\r\n";
-                $output .= '			<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>' . "\r\n";
-                $output .= '			<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>' . "\r\n";
-                $output .= '			<g:price>' . $variation_obj->get_price() . ' ' . $currency . '</g:price>' . "\r\n";
-                $output .= '			<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>' . "\r\n";
-                $output .= '			<g:availability>' . $stock_status . '</g:availability>' . "\r\n";
-                $output .= '			<g:sku>' . $variation_obj->get_sku() . '</g:sku>' . "\r\n";
-                $output .= '			<g:condition>New</g:condition>' . "\r\n";
-                $output .= '			<g:google_product_category>223</g:google_product_category>' . "\r\n";
-                $output .= '		</item>' . "\r\n";
+                $output .= '\t\t<item>' . PHP_EOL;
+                $output .= '\t\t\t<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>' . PHP_EOL;
+                $output .= '\t\t\t<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>' . PHP_EOL;
+                $output .= '\t\t\t<g:title>' . $product->post_title . '</g:title>' . PHP_EOL;
+                $output .= '\t\t\t<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
+                $output .= '\t\t\t<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>' . PHP_EOL;
+                $output .= '\t\t\t<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . PHP_EOL;
+                $output .= '\t\t\t<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>' . PHP_EOL;
+                $output .= '\t\t\t<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>' . PHP_EOL;
+                $output .= '\t\t\t<g:price>' . $variation_obj->get_price() .  $currency . '</g:price>' . PHP_EOL;
+                $output .= '\t\t\t<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>' . PHP_EOL;
+                $output .= '\t\t\t<g:availability>' . $stock_status . '</g:availability>' . PHP_EOL;
+                $output .= '\t\t\t<g:sku>' . $variation_obj->get_sku() . '</g:sku>' . PHP_EOL;
+                $output .= '\t\t\t<g:condition>New</g:condition>' . PHP_EOL;
+                $output .= '\t\t\t<g:google_product_category>223</g:google_product_category>' . PHP_EOL;
+                $output .= '\t\t</item>' . PHP_EOL;
             }
         } 
     }
 
-    $output .= '	</channel>' . "\r\n";
+    $output .= '\t</channel>' . PHP_EOL;
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
     echo $output;
