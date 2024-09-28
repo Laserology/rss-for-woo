@@ -40,7 +40,7 @@ function LSWCF_product_feed_callback() {
 
     $output = '<?xml version="1.0"?>' . PHP_EOL;
     $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
-    $output .= '\t<channel>' . PHP_EOL;
+    $output .= "\t" . '<channel>' . PHP_EOL;
     
     foreach ( $products as $product ) {
         $product_obj = wc_get_product( $product->ID );
@@ -81,27 +81,27 @@ function LSWCF_product_feed_callback() {
                 $stock_status = $stock == 'instock' ? 'In stock' : 'Out of stock';
                 $stock = $variation_obj->get_stock_status();
 
-                $output .= '\t\t<item>' . PHP_EOL;
-                $output .= '\t\t\t<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>' . PHP_EOL;
-                $output .= '\t\t\t<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>' . PHP_EOL;
-                $output .= '\t\t\t<g:title>' . $product->post_title . '</g:title>' . PHP_EOL;
-                $output .= '\t\t\t<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
-                $output .= '\t\t\t<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>' . PHP_EOL;
-                $output .= '\t\t\t<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . PHP_EOL;
-                $output .= '\t\t\t<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>' . PHP_EOL;
-                $output .= '\t\t\t<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>' . PHP_EOL;
-                $output .= '\t\t\t<g:price>' . $variation_obj->get_price() .  $currency . '</g:price>' . PHP_EOL;
-                $output .= '\t\t\t<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>' . PHP_EOL;
-                $output .= '\t\t\t<g:availability>' . $stock_status . '</g:availability>' . PHP_EOL;
-                $output .= '\t\t\t<g:sku>' . $variation_obj->get_sku() . '</g:sku>' . PHP_EOL;
-                $output .= '\t\t\t<g:condition>New</g:condition>' . PHP_EOL;
-                $output .= '\t\t\t<g:google_product_category>223</g:google_product_category>' . PHP_EOL;
-                $output .= '\t\t</item>' . PHP_EOL;
+                $output .= "\t\t" . '<item>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:item_group_id>' . $product_obj->get_sku() . '</g:item_group_id>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:id>' . $variation_obj->get_sku() . '-' . $variation_obj->get_attribute( 'pa_region' ) . '</g:id>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:title>' . $product->post_title . '</g:title>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $variation_obj->get_attribute( 'pa_region' ) . '</g:link>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . PHP_EOL;
+                $output .= "\t\t\t" . '<color>' . $variation_obj->get_attribute( 'pa_colour' ) . '</color>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:region>' . $variation_obj->get_attribute( 'pa_region' ) . '</g:region>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:price>' . $variation_obj->get_price() .  $currency . '</g:price>' . PHP_EOL;
+                $output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . $variation_obj->get_attribute( 'pa_region' ) . '</value></additional_variant_attribute>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:availability>' . $stock_status . '</g:availability>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:sku>' . $variation_obj->get_sku() . '</g:sku>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:google_product_category>223</g:google_product_category>' . PHP_EOL;
+                $output .= "\t\t" . '</item>' . PHP_EOL;
             }
         } 
     }
 
-    $output .= '\t</channel>' . PHP_EOL;
+    $output .= "\t" . '</channel>' . PHP_EOL;
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
     echo $output;
