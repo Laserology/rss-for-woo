@@ -14,8 +14,8 @@ Here is how you install the plugin:
 - Done.
 
 ## Usage
-To take advantage of this plugin, simply append ``/?feed=wc_product_feed`` to your url, like so:
-``https://laserology.net/?feed=wc_product_feed``
+To take advantage of this plugin, simply append ``/?feed=products`` to your url, like so:
+``https://laserology.net/?feed=products``
 
 You can also find the feed link from the plugin listing, as shown here:
 ![A picture showing a "View feed" link on a plugin listing](https://github.com/Laserology/rss-for-woo/blob/main/Screenshot_20240911_162859.png?raw=true)
