@@ -111,7 +111,6 @@ function LSWCF_product_feed_callback() {
 		"id" => array(),
 		"title" => array(),
 		"description" => array(),
-		"link" => array(),
 		"image_link" => array(),
 		"region" => array(),
 		"availability" => array(),
@@ -124,20 +123,21 @@ function LSWCF_product_feed_callback() {
 		array(
 	    		"rss" => array(
 				"version" => array(),
-				"xmlns:g" => array(),
+				"xmlns*" => array(),
 			),
     			"xml" => array(
 				"version" => array(),
 			),
-			"g:sku"=> array(),
 	    		"channel" => array(),
+			"link" => array(),
 			"item" => array(),
-			"g" => array($gtags),
-			"g:price" => array(),
+			"g*" => array($gtags),
 	    		"color" => array(),
-	    		"label" => array(),
-	    		"value" => array(),
-    			"additional_variant_attribute" => array(),
+    			"additional_variant_attribute" => array(
+				"label" => array(),
+				"value" => array(),
+			),
+			
 		)
 	);
     exit;
