@@ -106,27 +106,27 @@ function LSWCF_product_feed_callback() {
     header( 'Content-Type: application/xml; charset=utf-8' );
 
 	$gtags = array(
-		"item_group_id",
-		"google_product_category",
-		"id",
-		"title",
-		"description",
-		"link",
-		"image_link",
-		"region",
-		"availability",
-		"sku",
-		"condition",
+		"item_group_id" => array(),
+		"google_product_category" => array(),
+		"id" => array(),
+		"title" => array(),
+		"description" => array(),
+		"link" => array(),
+		"image_link" => array(),
+		"region" => array(),
+		"availability" => array(),
+		"sku" => array(),
+		"condition" => array(),
 	);
 	echo wp_kses(
 		$output,
 		array(
 	    		"rss" => array(
-				"version",
-				"xmlns",
+				"version" => array(),
+				"xmlns" => array(),
 			),
     			"xml" => array(
-				"version",
+				"version" => array(),
 			),
 			"g:sku"=> array(),
 	    		"channel" => array(),
