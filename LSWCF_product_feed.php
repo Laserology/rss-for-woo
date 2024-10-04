@@ -34,7 +34,7 @@ function LSWCF_product_feed_callback() {
 	$allowed_output = array(
 	    "<?xml version=\"1.0\"?>",
 	    "<g:item_group_id>",
-	    "'<g:id>",
+	    "<g:id>",
 	    "<g:title>",
 	    "<g:description>",
 	    "<g:link>",
