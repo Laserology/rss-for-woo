@@ -117,13 +117,14 @@ function LSWCF_product_feed_callback() {
 		"availability" => array(),
 		"sku" => array(),
 		"condition" => array(),
+		"price" => array(),
 	);
 	echo wp_kses(
 		$output,
 		array(
 	    		"rss" => array(
 				"version" => array(),
-				"xmlns" => array(),
+				"xmlns:g" => array(),
 			),
     			"xml" => array(
 				"version" => array(),
@@ -132,8 +133,8 @@ function LSWCF_product_feed_callback() {
 	    		"channel" => array(),
 			"item" => array(),
 			"g" => array($gtags),
-	    		"color" => array(),
 			"g:price" => array(),
+	    		"color" => array(),
 	    		"label" => array(),
 	    		"value" => array(),
     			"additional_variant_attribute" => array(),
