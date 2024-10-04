@@ -31,28 +31,6 @@ function LSWCF_product_feed() {
 }
 
 function LSWCF_product_feed_callback() {
-	$allowed_output = array(
-	    "<?xml version=\"1.0\"?>",
-	    "<g:item_group_id>",
-	    "<g:id>",
-	    "<g:title>",
-	    "<g:description>",
-	    "<g:link>",
-	    "<g:image_link>",
-	    "<color>",
-	    "<g:region>",
-	    "<g:price>",
-	    "<label>",
-	    "<value",
-	    "<additional_variant_attribute>",
-	    "<g:availability>",
-	    "<g:sku>",
-	    "<g:condition>New</g:condition>",
-	    "<g:google_product_category>",
-	    "<item>",
-	    "<channel>",
-	    "<rss>",
-	);
 	$args = array(
 		'post_type'      => 'product',
         'post_status'    => 'publish',
@@ -126,7 +104,31 @@ function LSWCF_product_feed_callback() {
     $output .= "\t" . '</channel>' . PHP_EOL;
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
-    echo wp_kses($output, $allowed_output);
+    echo wp_kses(
+		$output,
+		array(
+    		"<xml>" => array(),
+			"<g:item_group_id>" => array(),
+	    	"<g:id>" => array(),
+	    	"<g:title>" => array(),
+    		"<g:description>" => array(),
+			"<g:link>" => array(),
+	    	"<g:image_link>" => array(),
+	    	"<color>" => array(),
+    		"<g:region>" => array(),
+			"<g:price>" => array(),
+	    	"<label>" => array(),
+	    	"<value" => array(),
+    		"<additional_variant_attribute>" => array(),
+			"<g:availability>" => array(),
+	    	"<g:sku>" => array(),
+	    	"<g:condition>" => array(),
+    		"<g:google_product_category>" => array(),
+			"<item>" => array(),
+	    	"<channel>" => array(),
+	    	"<rss>" => array(),
+		)
+	);
     exit;
 }
 
