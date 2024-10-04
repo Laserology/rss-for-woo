@@ -33,46 +33,46 @@ function LSWCF_product_feed() {
 function LSWCF_product_feed_callback() {
 	$args = array(
 		'post_type'      => 'product',
-        'post_status'    => 'publish',
-        'posts_per_page' => -1,
-    );
-    $products = get_posts( $args );
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+	);
+	$products = get_posts( $args );
 
-    $output = '<?xml version="1.0"?>' . PHP_EOL;
-    $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
-    $output .= "\t" . '<channel>' . PHP_EOL;
+	$output = '<?xml version="1.0"?>' . PHP_EOL;
+	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
+	$output .= "\t" . '<channel>' . PHP_EOL;
     
-    foreach ( $products as $product ) {
-        $product_obj = wc_get_product( $product->ID );
+	foreach ( $products as $product ) {
+	$product_obj = wc_get_product( $product->ID );
 
         if ( $product_obj->is_type( 'variable' ) ) {
-            foreach ( $product_obj->get_available_variations() as $variation ) {
-                $variation_obj = new WC_Product_Variation( $variation['variation_id'] );
+		foreach ( $product_obj->get_available_variations() as $variation ) {
+			$variation_obj = new WC_Product_Variation( $variation['variation_id'] );
                 
-                //Use this section if you use region/currency variations on your products
-                $currency = $variation_obj->get_attribute( 'pa_region' );
+			 //Use this section if you use region/currency variations on your products
+			$currency = $variation_obj->get_attribute( 'pa_region' );
                 
-                switch ($currency) {
-                    case 'US':
-                        $currency = ' USD';
-                        break;
-                    case 'CA':
-                        $currency = ' CAD';
-                        break;
-                    case 'EU':
-                        $currency = ' EUR';
-                        break;
-                    case 'GB':
-                        $currency = ' GBP';
-                        break;
-                    case 'ZZ':
-                        $currency = ' ';
-                        break;
-		    default:
-			// Default to USD if it doesn't exist in the list
-			$currency = ' USD';
-			break;
-                }
+			switch ($currency) {
+			case 'US':
+				$currency = ' USD';
+				break;
+			case 'CA':
+				$currency = ' CAD';
+				break;
+			case 'EU':
+				$currency = ' EUR';
+				break;
+			case 'GB':
+				$currency = ' GBP';
+				break;
+			case 'ZZ':
+				$currency = ' ';
+				break;
+			default:
+				// Default to USD if it doesn't exist in the list
+				$currency = ' USD';
+				break;
+			}
 
                 $short_description = wp_strip_all_tags($product->post_excerpt);
                 $long_description = wp_strip_all_tags($product->post_content);
@@ -104,29 +104,33 @@ function LSWCF_product_feed_callback() {
     $output .= "\t" . '</channel>' . PHP_EOL;
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
-    echo wp_kses(
+
+	$gtags = array(
+		"item_group_id",
+		"google_product_category",
+		"id",
+		"title",
+		"description",
+		"link",
+		"image_link",
+		"region",
+		"availability",
+		"sku",
+		"condition",
+	);
+	echo wp_kses(
 		$output,
 		array(
 	    		"rss" => array(),
     			"xml" => array(),
 	    		"channel" => array(),
 			"item" => array(),
-			"g:item_group_id" => array(),
-	    		"g:id" => array(),
-	    		"g:title" => array(),
-    			"g:description" => array(),
-			"g:link" => array(),
-	    		"g:image_link" => array(),
+			"g" => array($gtags),
 	    		"color" => array(),
-    			"g:region" => array(),
 			"g:price" => array(),
 	    		"label" => array(),
 	    		"value" => array(),
     			"additional_variant_attribute" => array(),
-			"g:availability" => array(),
-	    		"g:sku" => array(),
-	    		"g:condition" => array(),
-    			"g:google_product_category" => array(),
 		)
 	);
     exit;
