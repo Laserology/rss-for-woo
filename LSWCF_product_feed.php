@@ -121,8 +121,14 @@ function LSWCF_product_feed_callback() {
 	echo wp_kses(
 		$output,
 		array(
-	    		"rss" => array(),
-    			"xml" => array(),
+	    		"rss" => array(
+				"version",
+				"xmlns",
+			),
+    			"xml" => array(
+				"version",
+			),
+			"g:sku"=> array(),
 	    		"channel" => array(),
 			"item" => array(),
 			"g" => array($gtags),
