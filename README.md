@@ -22,6 +22,7 @@ You can also find the feed link from the plugin listing, as shown here:
 
 ### Note
 For every product, you should add an extra field called 'google-product-id', and it should be a number indentifying the product's category. [You can reference this page here.](https://productcategory.net/)
+To add the property, search how to enable the "custom fields" menu from the screen options.
 
 ## This is a fork!
 This plugin originated from [here](https://github.com/vladjpuscasu/woocommerce_xml_product_feed), i have forked it and made it much more user friendly and plan to keep it up to date for the forseeable future.
