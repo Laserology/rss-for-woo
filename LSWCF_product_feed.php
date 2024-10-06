@@ -101,11 +101,15 @@ function LSWCF_product_feed_callback() {
         } 
     }
 
-    $output .= "\t" . '</channel>' . PHP_EOL;
-    $output .= '</rss>';
-    header( 'Content-Type: application/xml; charset=utf-8' );
-    echo wp_kses($output, 'feed');
-    exit;
+	$allowed_html = [
+		'g:link' => true,
+	]; 
+
+	$output .= "\t" . '</channel>' . PHP_EOL;
+	$output .= '</rss>';
+	header( 'Content-Type: application/xml; charset=utf-8' );
+	echo wp_kses($output, $allowed_html);
+	exit;
 }
 
 add_filter( 'plugin_action_links_rss-for-woo-main/LSWCF_product_feed.php', 'LSWCF_setup_view_feed_link' );
