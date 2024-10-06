@@ -106,12 +106,13 @@ function LSWCF_product_feed_callback() {
 
                 // Conditional to avoid printing un-used fields.
                 if (strlen($strip_region) > 0) {
-                    $output .= "\t\t\t" . '<g:id>' . $strip_sku . '-' . $strip_region . '</g:id>' . PHP_EOL;
+                    $output .= "\t\t\t" . '<g:id>' . $product->ID . '-' . $strip_region . '</g:id>' . PHP_EOL;
                     $output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . $strip_region . '</value></additional_variant_attribute>' . PHP_EOL;
                     $output .= "\t\t\t" . '<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $strip_region . '</g:link>' . PHP_EOL;
                     $output .= "\t\t\t" . '<g:region>' . $strip_region . '</g:region>' . PHP_EOL;
                 }
                 else {
+                    $output .= "\t\t\t" . '<g:id>' . $product->ID . '</g:id>' . PHP_EOL;
                     $output .= "\t\t\t" . '<g:link>' . get_permalink( $product->ID ) . '</g:link>' . PHP_EOL;
                 }
 
