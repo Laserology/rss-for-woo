@@ -101,10 +101,14 @@ function LSWCF_product_feed_callback() {
         } 
     }
 
+    $allowed_tags = array(
+        'g:link' => array(),
+    );
+
     $output .= "\t" . '</channel>' . PHP_EOL;
     $output .= '</rss>';
     header( 'Content-Type: application/xml; charset=utf-8' );
-    echo $output;
+    echo wp_kses($output, $allowed_tags);
     exit;
 }
 
