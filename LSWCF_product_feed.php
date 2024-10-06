@@ -132,5 +132,5 @@ function LSWCF_product_feed_callback() {
 	exit;
 }
 
-add_filter( 'plugin_action_links_rss-for-woo/LSWCF_product_feed.php', 'LSWCF_setup_view_feed_link' );
+add_filter( 'plugin_action_links_rss-for-woo-main/LSWCF_product_feed.php', 'LSWCF_setup_view_feed_link' );
 add_action( 'init', 'LSWCF_product_feed' );
