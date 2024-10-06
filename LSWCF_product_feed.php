@@ -115,7 +115,7 @@ function LSWCF_product_feed_callback() {
                     $output .= "\t\t\t" . '<g:link>' . get_permalink( $product->ID ) . '</g:link>' . PHP_EOL;
                 }
 
-                $GPID = wp_strip_all_tags($variation_obj->get_attribute( 'google-product-id' ));
+                $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
                 if (strlen($GPID) > 0) {
                     $output .= "\t\t\t" . '<g:google_product_category>' . $GPID . '</g:google_product_category>' . PHP_EOL;
                 }
