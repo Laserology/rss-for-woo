@@ -102,7 +102,7 @@ function LSWCF_product_feed_callback() {
     }
 
 	$allowed_html = [
-		'g:link' => true,
+		'g' => true,
 	]; 
 
 	$output .= "\t" . '</channel>' . PHP_EOL;
@@ -112,5 +112,11 @@ function LSWCF_product_feed_callback() {
 	exit;
 }
 
+add_filter( 'safe_style_css', function( $styles ) {
+	$styles [
+		'link'
+	];
+	return $styles;
+});
 add_filter( 'plugin_action_links_rss-for-woo-main/LSWCF_product_feed.php', 'LSWCF_setup_view_feed_link' );
 add_action( 'init', 'LSWCF_product_feed' );
