@@ -27,21 +27,21 @@ function LSWCF_setup_view_feed_link( $links ) {
 
 // Add custom feed
 function LSWCF_product_feed() {
-    add_feed('products', 'LSWCF_product_feed_callback');
+	add_feed('products', 'LSWCF_product_feed_callback');
 }
 
 function LSWCF_product_feed_callback() {
-    $args = array(
-        'post_type'      => 'product',
-        'post_status'    => 'publish',
-        'posts_per_page' => -1,
-    );
-    $products = get_posts( $args );
+	$args = array(
+		'post_type'      => 'product',
+		'post_status'    => 'publish',
+		'posts_per_page' => -1,
+	);
+	$products = get_posts( $args );
 
 	$output = '<?xml version="1.0"?>' . PHP_EOL;
 	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
 	$output .= "\t" . '<channel>' . PHP_EOL;
-	$output .= "\t\t" . '<title>' wp_title() . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<title>' . wp_title() . '</title>' . PHP_EOL;
 	$output .= "\t\t" . '<link>' . get_site_url() . '</link>' . PHP_EOL;
     
     foreach ( $products as $product ) {
