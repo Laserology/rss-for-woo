@@ -9,6 +9,8 @@
     Requires Plugins: woocommerce
 */
 
+// To-do: Cache feed & re-generate only when new items are added.
+
 // Add quick link to view the feed generated.
 function LSWCF_setup_view_feed_link( $links ) {
 	// Build and escape the URL.
@@ -41,7 +43,8 @@ function LSWCF_product_feed_callback() {
 	$output = '<?xml version="1.0"?>' . PHP_EOL;
 	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
 	$output .= "\t" . '<channel>' . PHP_EOL;
-	$output .= "\t\t" . '<title>' . wp_title() . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<title>' . bloginfo( 'name' ) . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<description>' . bloginfo( 'description' ) . '</description>' . PHP_EOL;
 	$output .= "\t\t" . '<link>' . get_site_url() . '</link>' . PHP_EOL;
     
     foreach ( $products as $product ) {
@@ -81,8 +84,7 @@ function LSWCF_product_feed_callback() {
                 $long_description = wp_strip_all_tags($product->post_content);
                 $description = strlen($short_description) > 0 ? $short_description : $long_description;
 
-                $stock_status = $stock == 'instock' ? 'In stock' : 'Out of stock';
-                $stock = $variation_obj->get_stock_status();
+		$stock_status = $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
 
                 // Sanitize user product data
                 $strip_region = wp_strip_all_tags($variation_obj->get_attribute( 'pa_region' ));
