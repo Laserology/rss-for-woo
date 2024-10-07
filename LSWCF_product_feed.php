@@ -38,9 +38,11 @@ function LSWCF_product_feed_callback() {
     );
     $products = get_posts( $args );
 
-    $output = '<?xml version="1.0"?>' . PHP_EOL;
-    $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
-    $output .= "\t" . '<channel>' . PHP_EOL;
+	$output = '<?xml version="1.0"?>' . PHP_EOL;
+	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
+	$output .= "\t" . '<channel>' . PHP_EOL;
+	$output .= "\t\t" . '<title>' wp_title() . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<link>' . get_site_url() . '</link>' . PHP_EOL;
     
     foreach ( $products as $product ) {
         $product_obj = wc_get_product( $product->ID );
