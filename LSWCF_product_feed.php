@@ -43,9 +43,9 @@ function LSWCF_product_feed_callback() {
 	$output = '<?xml version="1.0"?>' . PHP_EOL;
 	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
 	$output .= "\t" . '<channel>' . PHP_EOL;
-	$output .= "\t\t" . '<title>' . bloginfo( 'name' ) . '</title>' . PHP_EOL;
-	$output .= "\t\t" . '<description>' . bloginfo( 'description' ) . '</description>' . PHP_EOL;
-	$output .= "\t\t" . '<link>' . get_site_url() . '</link>' . PHP_EOL;
+	$output .= "\t\t" . '<title>' . wp_strip_all_tags(get_bloginfo( 'name' )) . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<description>' . wp_strip_all_tags(get_bloginfo( 'description' )) . '</description>' . PHP_EOL;
+	$output .= "\t\t" . '<link>' . esc_url(get_site_url()) . '</link>' . PHP_EOL;
     
     foreach ( $products as $product ) {
         $product_obj = wc_get_product( $product->ID );
@@ -96,7 +96,7 @@ function LSWCF_product_feed_callback() {
                 $output .= "\t\t\t" . '<g:title>' . $strip_title . '</g:title>' . PHP_EOL;
                 $output .= "\t\t\t" . '<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
                 $output .= "\t\t\t" . '<g:sku>' . $strip_sku . '</g:sku>' . PHP_EOL;
-                $output .= "\t\t\t" . '<g:image_link>' . $variation['image']['thumb_src'] . '</g:image_link>' . PHP_EOL;
+                $output .= "\t\t\t" . '<g:image_link>' . esc_url($variation['image']['thumb_src']) . '</g:image_link>' . PHP_EOL;
 
                 if (strlen($strip_color) > 0) {
                     $output .= "\t\t\t" . '<color>' . $strip_color . '</color>' . PHP_EOL;
@@ -112,12 +112,12 @@ function LSWCF_product_feed_callback() {
                 if (strlen($strip_region) > 0) {
                     $output .= "\t\t\t" . '<g:id>' . $product->ID . '-' . $strip_region . '</g:id>' . PHP_EOL;
                     $output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . $strip_region . '</value></additional_variant_attribute>' . PHP_EOL;
-                    $output .= "\t\t\t" . '<g:link>' . get_permalink( $product->ID ) . '?attribute_pa_region=' . $strip_region . '</g:link>' . PHP_EOL;
+                    $output .= "\t\t\t" . '<g:link>' . esc_url(get_permalink( $product->ID )) . '?attribute_pa_region=' . $strip_region . '</g:link>' . PHP_EOL;
                     $output .= "\t\t\t" . '<g:region>' . $strip_region . '</g:region>' . PHP_EOL;
                 }
                 else {
                     $output .= "\t\t\t" . '<g:id>' . $product->ID . '</g:id>' . PHP_EOL;
-                    $output .= "\t\t\t" . '<g:link>' . get_permalink( $product->ID ) . '</g:link>' . PHP_EOL;
+                    $output .= "\t\t\t" . '<g:link>' . esc_url(get_permalink( $product->ID )) . '</g:link>' . PHP_EOL;
                 }
 
                 $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
