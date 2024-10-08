@@ -116,7 +116,7 @@ function LSWCF_product_feed_callback() {
                     $output .= "\t\t\t" . '<g:region>' . $strip_region . '</g:region>' . PHP_EOL;
                 }
                 else {
-                    $output .= "\t\t\t" . '<g:id>' . $product->ID . '</g:id>' . PHP_EOL;
+                    $output .= "\t\t\t" . '<g:id>' . wp_strip_all_tags( $product->ID ) . '</g:id>' . PHP_EOL;
                     $output .= "\t\t\t" . '<g:link>' . esc_url(get_permalink( $product->ID )) . '</g:link>' . PHP_EOL;
                 }
 
