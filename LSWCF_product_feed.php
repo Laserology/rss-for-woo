@@ -3,7 +3,7 @@
     Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
     Description: Free public XML/RSS feed for your woo store.
     License: GPL v2 or later
-    Version: 1.3
+    Version: 1.2
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
     Requires Plugins: woocommerce
@@ -88,9 +88,29 @@ function LSWCF_product_feed_callback() {
                 $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
             }
         }
+        /*
         else {
-            continue;
+            $currency = GetCurrency( $product_obj->get_attribute( 'pa_region' ) );
+
+            // Sanitize the descriptions
+            $short_description = wp_strip_all_tags($product->post_excerpt);
+            $long_description = wp_strip_all_tags($product->post_content);
+            $description = strlen($short_description) > 0 ? $short_description : $long_description;
+
+            $stock = $product_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+
+            // Sanitize user product data
+            $strip_region = wp_strip_all_tags($product_obj->get_attribute( 'pa_region' ));
+            $strip_color = wp_strip_all_tags($product_obj->get_attribute( 'pa_colour' ));
+            $strip_linkto = esc_url($product_obj->get_image());
+            $strip_title = wp_strip_all_tags($product->post_title);
+            $strip_sku = wp_strip_all_tags($product_obj->get_sku());
+            $price = $product_obj->get_price() .  $currency;
+            $id = wp_strip_all_tags( $product->ID );
+
+            $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
         }
+        */
 
         // Begin new product.
         $output .= "\t\t" . '<item>' . PHP_EOL;
