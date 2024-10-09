@@ -88,6 +88,9 @@ function LSWCF_product_feed_callback() {
                 $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
             }
         }
+        else {
+            continue;
+        }
         /*
         else {
             $currency = GetCurrency( $product_obj->get_attribute( 'pa_region' ) );
