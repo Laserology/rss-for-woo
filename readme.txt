@@ -2,7 +2,7 @@
 Contributors: laserology
 Tags: woo, product feed, google marketplace, rss, rss feed
 Requires at least: 4.7
-Tested up to: 6.6.1
+Tested up to: 6.6.2
 Stable tag: 1.2
 Requires PHP: 7.0
 License: GPLv2 or later
