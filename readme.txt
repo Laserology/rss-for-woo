@@ -46,5 +46,8 @@ To add the property, search how to enable the "custom fields" menu from the scre
 
 == Changelog ==
 
+= 1.2.2 =
+* Skip to latest public release version
+
 = 1.0 =
 * Initial release.
