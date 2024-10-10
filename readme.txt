@@ -3,7 +3,7 @@ Contributors: laserology
 Tags: woo, product feed, google marketplace, rss, rss feed
 Requires at least: 4.7
 Tested up to: 6.6.2
-Stable tag: 1.2
+Stable tag: 1.2.2
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -15,6 +15,8 @@ A very simple wordpress plugin to dynamically generate an XML RSS feed for your 
 RSS Product feed for Woo!
 
 Creates a Woo product feed url in the XML format that can be used to upload a catalog stream to your Google Merchant Center catalog or Facebook Shop catalog. This includes regional variations and color variations of products.
+
+You can visit our github page [here!](https://github.com/Laserology/rss-for-woo/)
 
 == Frequently Asked Questions ==
 
