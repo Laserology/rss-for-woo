@@ -3,7 +3,7 @@
     Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
     Description: Free public XML/RSS feed for your woo store.
     License: GPL v2 or later
-    Version: 1.2
+    Version: 1.2.1
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
     Requires Plugins: woocommerce
@@ -19,7 +19,7 @@ function LSWCF_setup_view_feed_link( $links ) {
 	    get_site_url() . "?feed=products"
 	);
 	// Create the link.
-	$settings_link = "<a href='$url'>" . __( 'View feed', 'rss-for-woo-main' ) . '</a>';
+	$settings_link = "<a href='$url'>" . __( 'View feed' ) . '</a>';
 	// Adds the link to the end of the array.
 	array_push(
 		$links,
@@ -178,5 +178,5 @@ function GetCurrency($currency) {
     }
 }
 
-add_filter( 'plugin_action_links_rss-for-woo-main/LSWCF_product_feed.php', 'LSWCF_setup_view_feed_link' );
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'LSWCF_setup_view_feed_link' );
 add_action( 'init', 'LSWCF_product_feed' );
