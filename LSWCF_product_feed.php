@@ -3,7 +3,7 @@
     Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
     Description: Free public XML/RSS feed for your woo store.
     License: GPL v2 or later
-    Version: 1.2.2
+    Version: 1.3
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
     Requires Plugins: woocommerce
@@ -63,7 +63,7 @@ function LSWCF_product_feed_callback() {
         $stock = '';
         $GPID = '';
 
-        if ( $product_obj->is_type( 'variable' ) ) {
+        if ( $product_obj->is_type( 'variable' ) ) { // Run through variable product type.
             foreach ( $product_obj->get_available_variations() as $variation ) {
                 $variation_obj = new WC_Product_Variation( $variation['variation_id'] );
 
@@ -79,7 +79,7 @@ function LSWCF_product_feed_callback() {
                 // Sanitize user product data
                 $strip_region = wp_strip_all_tags($variation_obj->get_attribute( 'pa_region' ));
                 $strip_color = wp_strip_all_tags($variation_obj->get_attribute( 'pa_colour' ));
-                $strip_linkto = esc_url($variation['image']['thumb_src']);
+                $strip_linkto = wp_get_attachment_url( $variation_obj->get_image_id() );
                 $strip_title = wp_strip_all_tags($product->post_title);
                 $strip_sku = wp_strip_all_tags($product_obj->get_sku());
                 $price = $variation_obj->get_price() .  $currency;
@@ -88,11 +88,7 @@ function LSWCF_product_feed_callback() {
                 $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
             }
         }
-        else {
-            continue;
-        }
-        /*
-        else {
+        else { // Run througn static product type.
             $currency = GetCurrency( $product_obj->get_attribute( 'pa_region' ) );
 
             // Sanitize the descriptions
@@ -105,7 +101,7 @@ function LSWCF_product_feed_callback() {
             // Sanitize user product data
             $strip_region = wp_strip_all_tags($product_obj->get_attribute( 'pa_region' ));
             $strip_color = wp_strip_all_tags($product_obj->get_attribute( 'pa_colour' ));
-            $strip_linkto = esc_url($product_obj->get_image());
+            $strip_linkto = wp_get_attachment_url( $product_obj->get_image_id() );
             $strip_title = wp_strip_all_tags($product->post_title);
             $strip_sku = wp_strip_all_tags($product_obj->get_sku());
             $price = $product_obj->get_price() .  $currency;
@@ -113,7 +109,6 @@ function LSWCF_product_feed_callback() {
 
             $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
         }
-        */
 
         // Begin new product.
         $output .= "\t\t" . '<item>' . PHP_EOL;
