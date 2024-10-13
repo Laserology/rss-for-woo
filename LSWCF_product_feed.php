@@ -81,9 +81,9 @@ function LSWCF_product_feed_callback() {
                 $strip_color = wp_strip_all_tags($variation_obj->get_attribute( 'pa_colour' ));
                 $strip_linkto = wp_get_attachment_url( $variation_obj->get_image_id() );
                 $strip_title = wp_strip_all_tags($product->post_title);
-                $strip_sku = wp_strip_all_tags($product_obj->get_sku());
+                $strip_sku = wp_strip_all_tags($variation_obj->get_sku());
                 $price = $variation_obj->get_price() .  $currency;
-                $id = wp_strip_all_tags( $product->ID );
+                $id = wp_strip_all_tags( $variation_obj->get_id() );
 
                 $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
             }
@@ -104,8 +104,8 @@ function LSWCF_product_feed_callback() {
             $strip_linkto = wp_get_attachment_url( $product_obj->get_image_id() );
             $strip_title = wp_strip_all_tags($product->post_title);
             $strip_sku = wp_strip_all_tags($product_obj->get_sku());
-            $price = $product_obj->get_price() .  $currency;
-            $id = wp_strip_all_tags( $product->ID );
+            $price = $product_obj->get_price() . $currency;
+            $id = wp_strip_all_tags( $product_obj->get_id() );
 
             $GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
         }
