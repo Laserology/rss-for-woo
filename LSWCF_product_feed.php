@@ -150,11 +150,11 @@ function LSWCF_product_feed_callback() {
     }
 
     // Echo footer for RSS feed & return data.
-	$output .= "\t" . '</channel>' . PHP_EOL;
-	$output .= '</rss>';
-	header( 'Content-Type: application/xml; charset=utf-8' );
-	echo $output;
-	exit;
+    $output .= "\t" . '</channel>' . PHP_EOL;
+    $output .= '</rss>';
+    header( 'Content-Type: application/xml; charset=utf-8' );
+    echo $output;
+    exit;
 }
 
 function GetCurrency($currency) {
