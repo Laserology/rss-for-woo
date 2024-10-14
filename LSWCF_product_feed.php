@@ -3,11 +3,11 @@
     Plugin URI: https://github.com/Laserology/woocommerce-product-feed/
     Description: Free public XML/RSS feed for your woo store.
     License: GPL v2 or later
-    Version: 1.3.1
+    Version: 1.3.2
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
     Requires Plugins: woocommerce
-    Text Domain: rss-for-woo-main
+    Text Domain: rss-for-woo
 */
 
 // To-do: Cache feed & re-generate only when new items are added.
@@ -19,7 +19,7 @@ function LSWCF_setup_view_feed_link( $links ) {
 	    get_site_url() . "?feed=products"
 	);
 	// Create the link.
-	$settings_link = "<a href='$url'>" . __( 'View feed' ) . '</a>';
+	$settings_link = "<a href='$url'>" . __( 'View feed', 'view-feed-plugin-page-text' ) . '</a>';
 	// Adds the link to the end of the array.
 	array_push(
 		$links,
