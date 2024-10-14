@@ -7,7 +7,7 @@
     Author: Laserology, vladjpuscasu
     Author URI: https://laserology.net/
     Requires Plugins: woocommerce
-    Text Domain: rss-for-woo
+    Text Domain: rss-feed-for-woo
 */
 
 // To-do: Cache feed & re-generate only when new items are added.
@@ -19,7 +19,7 @@ function LSWCF_setup_view_feed_link( $links ) {
 	    get_site_url() . "?feed=products"
 	);
 	// Create the link.
-	$settings_link = "<a href='$url'>" . __( 'View feed', 'view-feed-plugin-page-text' ) . '</a>';
+	$settings_link = "<a href='$url'>" . __( 'View feed', 'rss-feed-for-woo' ) . '</a>';
 	// Adds the link to the end of the array.
 	array_push(
 		$links,
