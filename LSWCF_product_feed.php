@@ -72,12 +72,13 @@ function LSWCF_product_feed_callback() {
 				$strip_title = wp_strip_all_tags($product->post_title);
 				$strip_sku = wp_strip_all_tags($variation_obj->get_sku());
 				$price = $variation_obj->get_price() .  $currency;
-				$id = wp_strip_all_tags( $product_obj->get_id() ); // Share same product ID across variations to properly group them.
+				$id = wp_strip_all_tags( $variation_obj->get_id() );
+				$parent_id = wp_strip_all_tags( $product_obj->get_id() ); // Share same product ID across variations to properly group them.
 
 				$GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
 
 				// Write one product to the output for this loop.
-				$output .= emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $id, $strip_region, $GPID);
+				$output .= emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $parent_id, $id, $strip_region, $GPID);
 			}
 		}
 		else { // Run througn static product type.
@@ -102,7 +103,7 @@ function LSWCF_product_feed_callback() {
 			$GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
 
 			// Write one product to the output.
-			$output .= emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $id, $strip_region, $GPID);
+			$output .= emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $id, $id, $strip_region, $GPID);
 		}
 	}
 
@@ -115,7 +116,7 @@ function LSWCF_product_feed_callback() {
 }
 
 // Emit one product entry.
-function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $id, $strip_region, $GPID) {
+function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $parent_id, $id, $strip_region, $GPID) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -134,7 +135,7 @@ function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $str
 	$output .= "\t\t\t" . '<g:price>' . $price . '</g:price>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:availability>' . $stock . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:item_group_id>' . $strip_sku . '</g:item_group_id>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:item_group_id>' . $parent_id . '</g:item_group_id>' . PHP_EOL;
 
 	// Conditional to avoid printing un-used fields.
 	if (strlen($strip_region) > 0) {
