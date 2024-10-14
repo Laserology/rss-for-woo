@@ -44,6 +44,9 @@ For every product, you should add an extra field called 'google-product-id', and
 To add the property, search how to enable the "custom fields" menu from the screen options.
 
 == Changelog ==
+= 1.3.4 =
+* Add brand and mpn tags
+
 = 1.3.3 =
 * General improvements to image loading
 * fixed a critical bug preventing variations from being properly displayed
