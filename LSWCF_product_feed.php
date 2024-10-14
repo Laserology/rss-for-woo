@@ -72,7 +72,7 @@ function LSWCF_product_feed_callback() {
 				$strip_title = wp_strip_all_tags($product->post_title);
 				$strip_sku = wp_strip_all_tags($variation_obj->get_sku());
 				$price = $variation_obj->get_price() .  $currency;
-				$id = wp_strip_all_tags( $variation_obj->get_id() );
+				$id = wp_strip_all_tags( $product_obj->get_id() ); // Share same product ID across variations to properly group them.
 
 				$GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
 
