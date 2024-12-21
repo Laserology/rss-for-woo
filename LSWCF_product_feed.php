@@ -121,19 +121,19 @@ function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $str
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
 	// Output product stripped data as XML.
-	$output .= "\t\t\t" . '<g:title>' . $strip_title . '</g:title>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:title>' . htmlspecialchars($strip_title, ENT_XML1, 'UTF-8') . '</g:title>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:sku>' . $strip_sku . '</g:sku>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:image_link>' . $strip_linkto . '</g:image_link>' . PHP_EOL;
-
+	$output .= "\t\t\t" . '<g:sku>' . htmlspecialchars($strip_sku, ENT_XML1, 'UTF-8') . '</g:sku>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:image_link>' . htmlspecialchars($strip_linkto, ENT_XML1, 'UTF-8') . '</g:image_link>' . PHP_EOL;
+	
 	if (strlen($strip_color) > 0) {
-		$output .= "\t\t\t" . '<color>' . $strip_color . '</color>' . PHP_EOL;
+	    $output .= "\t\t\t" . '<color>' . htmlspecialchars($strip_color, ENT_XML1, 'UTF-8') . '</color>' . PHP_EOL;
 	}
-
-	$output .= "\t\t\t" . '<g:brand>' . wp_strip_all_tags(get_bloginfo( 'name' )) . '</g:brand>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:mpn>' . $strip_sku . '-' . $id . '</g:mpn>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:price>' . $price . '</g:price>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:availability>' . $stock . '</g:availability>' . PHP_EOL;
+	
+	$output .= "\t\t\t" . '<g:brand>' . htmlspecialchars(wp_strip_all_tags(get_bloginfo('name')), ENT_XML1, 'UTF-8') . '</g:brand>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:mpn>' . htmlspecialchars($strip_sku . '-' . $id, ENT_XML1, 'UTF-8') . '</g:mpn>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:price>' . htmlspecialchars($price, ENT_XML1, 'UTF-8') . '</g:price>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:availability>' . htmlspecialchars($stock, ENT_XML1, 'UTF-8') . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:item_group_id>' . $parent_id . '</g:item_group_id>' . PHP_EOL;
 
