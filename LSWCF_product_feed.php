@@ -34,6 +34,13 @@ function LSWCF_product_feed() {
 }
 
 function LSWCF_product_feed_callback() {
+	// Check for a valid transient cache, and if it exists, use it instead.
+	if ( false !== ( $value = get_transient( 'LSWCF_RSS_Cache_Transient' ) ) ) {
+		header( 'Content-Type: application/xml; charset=utf-8' );
+		echo $value;
+		exit;
+	}
+
 	$products = get_posts([
 		'post_type'      => 'product',
 		'post_status'    => 'publish',
@@ -112,6 +119,10 @@ function LSWCF_product_feed_callback() {
 	$output .= '</rss>';
 	header( 'Content-Type: application/xml; charset=utf-8' );
 	echo $output;
+
+	// Update the transient cache for up to the next 1 minute as it was expired or was deleted.
+	// Transient expiration times are a maximum. There is no minimum. Transients can disappear at a random time, but they will always disapear by the expiration time.
+	set_transient( 'LSWCF_RSS_Cache_Transient', $output, 60 );
 	exit;
 }
 
@@ -125,11 +136,11 @@ function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $str
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:sku>' . htmlspecialchars($strip_sku, ENT_XML1, 'UTF-8') . '</g:sku>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:image_link>' . htmlspecialchars($strip_linkto, ENT_XML1, 'UTF-8') . '</g:image_link>' . PHP_EOL;
-	
+
 	if (strlen($strip_color) > 0) {
 	    $output .= "\t\t\t" . '<color>' . htmlspecialchars($strip_color, ENT_XML1, 'UTF-8') . '</color>' . PHP_EOL;
 	}
-	
+
 	$output .= "\t\t\t" . '<g:brand>' . htmlspecialchars(wp_strip_all_tags(get_bloginfo('name')), ENT_XML1, 'UTF-8') . '</g:brand>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:mpn>' . htmlspecialchars($strip_sku . '-' . $id, ENT_XML1, 'UTF-8') . '</g:mpn>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:price>' . htmlspecialchars($price, ENT_XML1, 'UTF-8') . '</g:price>' . PHP_EOL;
