@@ -10,8 +10,6 @@ Requires Plugins: woocommerce
 Text Domain: rss-feed-for-woo
 */
 
-// To-do: Cache feed & re-generate only when new items are added.
-
 // Add quick link to view the feed generated.
 function LSWCF_setup_view_feed_link( $links ) {
 	// Build and escape the URL.
