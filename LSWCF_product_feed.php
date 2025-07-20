@@ -57,6 +57,12 @@ function LSWCF_product_feed_callback() {
 	foreach ( $products as $product ) {
 		$product_obj = wc_get_product( $product->ID );
 
+		# Check if the product is visible in the first place to avoid leaking secrets and preventing uploading unwanted listings.
+		if ( !$product_obj->is_visible() ) {
+			# Skip this entry if it is hidden.
+			continue;
+		}
+
 		if ( $product_obj->is_type( 'variable' ) ) { // Run through variable product type.
 			foreach ( $product_obj->get_available_variations() as $variation ) {
 				$variation_obj = new WC_Product_Variation( $variation['variation_id'] );
