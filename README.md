@@ -20,7 +20,7 @@ To take advantage of this plugin, simply append ``/?feed=products`` to your url,
 ``https://laserology.net/?feed=products``
 
 You can also find the feed link from the plugin listing, as shown here:
-![A picture showing a "View feed" link on a plugin listing](https://github.com/Laserology/rss-for-woo/blob/main/Screenshot_20240911_162859.png?raw=true)
+![A picture showing a "View feed" link on a plugin listing](https://github.com/Laserology/rss-for-woo/blob/main/.wordpress-org/Screenshot_20240911_162859.png?raw=true)
 
 ### Note
 For every product, you should add an extra field called 'google-product-id', and it should be a number indentifying the product's category. [You can reference this page here.](https://productcategory.net/)
