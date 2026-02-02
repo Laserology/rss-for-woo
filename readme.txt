@@ -1,5 +1,5 @@
 === RSS feed for Woo ===
-Contributors: laserology
+Contributors: laserology, vladjpuscasu
 Tags: woo, product feed, google marketplace, rss, rss feed
 Requires at least: 6.2
 Tested up to: 6.9
