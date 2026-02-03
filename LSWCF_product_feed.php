@@ -17,7 +17,7 @@ function LSWCF_setup_view_feed_link( $links ) {
 		get_site_url() . "?feed=products"
 	);
 	// Create the link.
-	$settings_link = "<a href='$url'>" . __( 'View feed', 'rss-feed-for-woo' ) . '</a>';
+	$settings_link = "<a href='$url'>" . __( 'Open RSS feed', 'rss-feed-for-woo' ) . '</a>';
 	// Adds the link to the end of the array.
 	array_push(
 		$links,
