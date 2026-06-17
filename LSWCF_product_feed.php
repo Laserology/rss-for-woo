@@ -2,7 +2,7 @@
 Plugin Name: RSS feed for Woo
 Plugin URI: https://github.com/Laserology/rss-for-woo/
 Description: Free public XML/RSS feed for your woo store.
-Version: 1.3.12
+Version: 1.4
 Requires at least: 7.0
 Requires PHP: 7.4
 License: GPL v2 or later
