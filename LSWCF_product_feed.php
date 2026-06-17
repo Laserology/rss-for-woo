@@ -91,14 +91,15 @@ function LSWCF_product_feed_callback() {
 
 				$temp_link = sanitize_text_field( wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0] );
 
-				//$title =    [ $product->post_title, get_the_title($variation['variation_id']) ];
-				$stock =      $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
-				$region =     sanitize_text_field( $variation_obj->get_attribute( 'pa_region' ) );
-				$color =      sanitize_text_field( $variation_obj->get_attribute( 'pa_colour' ) );
-				$image_link = strlen( $temp_link ) > 0 ? $temp_link : $image_link;
-				//$sku =      [ $product_obj->get_sku(), $variation_obj->get_sku() ];
-				$price =      $variation_obj->get_price() .  $currency;
-				$id =         $variation_obj->get_id();
+				$title =        [ $product->post_title, get_the_title($variation['variation_id']) ];
+				//$description =  strlen( $description )
+				$stock =        $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+				$region =       sanitize_text_field( $variation_obj->get_attribute( 'pa_region' ) );
+				$color =        sanitize_text_field( $variation_obj->get_attribute( 'pa_colour' ) );
+				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
+				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
+				$price =        $variation_obj->get_price() .  $currency;
+				$id =           $variation_obj->get_id();
 
 				// Write one product to the output.
 				$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, true);
@@ -128,9 +129,26 @@ function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $co
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
 	// Output product stripped data as XML.
-	$output .= "\t\t\t" . '<g:title>' . esc_html( $title ) . '</g:title>' . PHP_EOL;
+	if ( $is_variant ) {
+		// Fallback to parent ID if needed.
+		$fsku = strlen ( $sku[1] ) == 0 ? $sku[0] : $sku[1];
+		$fsku = strlen ( $fsku ) == 0 ? $id : $fsku;
+
+		$output .= "\t\t\t" . '<g:title>' . esc_html( $title[1] ) . '</g:title>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:item_group_title>' . esc_html( $title[0] ) . '</g:item_group_title>' . PHP_EOL;
+        $output .= "\t\t\t" . '<g:item_group_id>' . esc_html( $sku[0] ) . '</g:item_group_id>' . PHP_EOL;
+        $output .= "\t\t\t" . '<g:mpn>' . esc_html( $fsku ) . '-' . esc_html( $id ) . '</g:mpn>' . PHP_EOL;
+        $output .= "\t\t\t" . '<g:sku>' . esc_html( $fsku ) . '</g:sku>' . PHP_EOL;
+        $output .= "\t\t\t" . '<g:id>' . esc_html( $fsku ) . '</g:id>' . PHP_EOL;
+	}
+	else {
+	    $output .= "\t\t\t" . '<g:title>' . esc_html( $title ) . '</g:title>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:mpn>' . esc_html( $sku ) . '-' . esc_html($id) . '</g:mpn>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:sku>' . esc_html( $sku ) . '</g:sku>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:id>' . esc_html( $sku ) . '</g:id>' . PHP_EOL;
+	}
+
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . esc_html( $description ) . ']]></g:description>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:sku>' . esc_html( $sku ) . '</g:sku>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:image_link>' . esc_url( $image_link ) . '</g:image_link>' . PHP_EOL;
 
 	if (strlen($color) > 0) {
@@ -138,21 +156,17 @@ function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $co
 	}
 
 	$output .= "\t\t\t" . '<g:brand>' . esc_html( sanitize_text_field( get_bloginfo( 'name' ) ) ) . '</g:brand>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:mpn>' . esc_html( $sku ) . '-' . esc_html( $id ) . '</g:mpn>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:price>' . esc_html( $price ) . '</g:price>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:availability>' . esc_html( $stock ) . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:item_group_id>' . esc_html( $sku ) . '</g:item_group_id>' . PHP_EOL;
 
 	// Conditional to avoid printing un-used fields.
 	if (strlen($region) > 0) {
-		$output .= "\t\t\t" . '<g:id>' . $id . '-' . esc_html( $region ) . '</g:id>' . PHP_EOL;
 		$output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . esc_html( $region ) . '</value></additional_variant_attribute>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:link>' . esc_html( sanitize_url( get_permalink( $id ) ) ) . '?attribute_pa_region=' . esc_html( $region ) . '</g:link>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:region>' . esc_html( $region ) . '</g:region>' . PHP_EOL;
 	}
 	else {
-		$output .= "\t\t\t" . '<g:id>' . $id . '</g:id>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:link>' . esc_url( sanitize_url( get_permalink( $id ) ) ) . '</g:link>' . PHP_EOL;
 	}
 
