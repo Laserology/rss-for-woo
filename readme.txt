@@ -1,7 +1,7 @@
 === RSS feed for Woo ===
 Contributors: laserology, vladjpuscasu
 Tags: woo, product feed, google marketplace, rss, rss feed
-Requires at least: 6.9
+Requires at least: 7.0
 Tested up to: 7.0
 Stable tag: 1.3.12
 Requires PHP: 7.4

@@ -52,8 +52,8 @@ function LSWCF_product_feed_callback() {
 	$output = '<?xml version="1.0"?>' . PHP_EOL;
 	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
 	$output .= "\t" . '<channel>' . PHP_EOL;
-	$output .= "\t\t" . '<title>' . wp_strip_all_tags(get_bloginfo( 'name' )) . '</title>' . PHP_EOL;
-	$output .= "\t\t" . '<description>' . wp_strip_all_tags(get_bloginfo( 'description' )) . '</description>' . PHP_EOL;
+	$output .= "\t\t" . '<title>' . esc_html(get_bloginfo( 'name' )) . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<description>' . esc_html(get_bloginfo( 'description' )) . '</description>' . PHP_EOL;
 	$output .= "\t\t" . '<link>' . esc_url(get_site_url()) . '</link>' . PHP_EOL;
 
 	// Loop over all products.
@@ -73,51 +73,51 @@ function LSWCF_product_feed_callback() {
 				$currency = GetCurrency( $variation_obj->get_attribute( 'pa_region' ) );
 
 				// Sanitize the descriptions
-				$short_description = wp_strip_all_tags($product->post_excerpt);
-				$long_description = wp_strip_all_tags($product->post_content);
+				$short_description = $product->post_excerpt;
+				$long_description = $product->post_content;
 				$description = strlen($short_description) > 0 ? $short_description : $long_description;
 
 				$stock = $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+				$currency = LSWCF_get_currency( $variation_obj->get_attribute( 'pa_region' ) );
 
 				// Sanitize user product data
-				$strip_region = wp_strip_all_tags($variation_obj->get_attribute( 'pa_region' ));
-				$strip_color = wp_strip_all_tags($variation_obj->get_attribute( 'pa_colour' ));
-				$strip_linkto = wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0];
-				$strip_title = wp_strip_all_tags($product->post_title);
-				$strip_sku = wp_strip_all_tags($variation_obj->get_sku());
+				$region = $variation_obj->get_attribute( 'pa_region' );
+				$color = $variation_obj->get_attribute( 'pa_colour' );
+				$image_link = wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0];
+				$title = [ $product->post_title, get_the_title($variation['variation_id']) ];
+				$sku = [ $product_obj->get_sku(), $variation_obj->get_sku() ];
 				$price = $variation_obj->get_price() .  $currency;
-				$id = wp_strip_all_tags( $variation_obj->get_id() );
-				$parent_id = wp_strip_all_tags( $product_obj->get_id() ); // Share same product ID across variations to properly group them.
+				$id = $variation_obj->get_id();
 
-				$GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
+				$GPID = $product_obj->get_meta( 'google-product-id' );
 
 				// Write one product to the output for this loop.
-				$output .= emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $parent_id, $id, $strip_region, $GPID);
+				$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $GPID, true);
 			}
 		}
 		else { // Run througn static product type.
-			$currency = GetCurrency( $product_obj->get_attribute( 'pa_region' ) );
+			$currency = LSWCF_get_currency( $product_obj->get_attribute( 'pa_region' ) );
 
 			// Sanitize the descriptions
-			$short_description = wp_strip_all_tags($product->post_excerpt);
-			$long_description = wp_strip_all_tags($product->post_content);
+			$short_description = $product->post_excerpt;
+			$long_description = $product->post_content;
 			$description = strlen($short_description) > 0 ? $short_description : $long_description;
 
 			$stock = $product_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
 
 			// Sanitize user product data
-			$strip_region = wp_strip_all_tags($product_obj->get_attribute( 'pa_region' ));
-			$strip_color = wp_strip_all_tags($product_obj->get_attribute( 'pa_colour' ));
-			$strip_linkto = wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0];
-			$strip_title = wp_strip_all_tags($product->post_title);
-			$strip_sku = wp_strip_all_tags($product_obj->get_sku());
+			$region = $product_obj->get_attribute( 'pa_region' );
+			$color = $product_obj->get_attribute( 'pa_colour' );
+			$mage_link = wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0];
+			$title = $product->post_title;
+			$sku = $product_obj->get_sku();
 			$price = $product_obj->get_price() . $currency;
-			$id = wp_strip_all_tags( $product_obj->get_id() );
+			$id = $product_obj->get_id();
 
-			$GPID = wp_strip_all_tags($product_obj->get_meta( 'google-product-id' ));
+			$GPID = $product_obj->get_meta( 'google-product-id' );
 
 			// Write one product to the output.
-			$output .= emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $id, $id, $strip_region, $GPID);
+			$output .= LSWCF_emit_single_filtered($title, $description, $sku, $mage_link, $color, $price, $stock, $id, $region, $GPID, false);
 		}
 	}
 
@@ -134,7 +134,7 @@ function LSWCF_product_feed_callback() {
 }
 
 // Emit one product entry.
-function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $strip_color, $price, $stock, $parent_id, $id, $strip_region, $GPID) {
+function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $GPID, $is_variant) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -153,7 +153,14 @@ function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $str
 	$output .= "\t\t\t" . '<g:price>' . htmlspecialchars($price, ENT_XML1, 'UTF-8') . '</g:price>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:availability>' . htmlspecialchars($stock, ENT_XML1, 'UTF-8') . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:item_group_id>' . $parent_id . '</g:item_group_id>' . PHP_EOL;
+
+	if ( $is_variant ) {
+	    $output .= "\t\t\t" . '<g:id>' . wp_strip_all_tags( $strip_sku[1] ) . '</g:id>' . PHP_EOL;
+	    $output .= "\t\t\t" . '<g:item_group_id>' . wp_strip_all_tags( $strip_sku[0] ) . '</g:item_group_id>' . PHP_EOL;
+	}
+	else {
+	    $output .= "\t\t\t" . '<g:id>' . wp_strip_all_tags( $strip_sku ) . '</g:id>' . PHP_EOL;
+	}
 
 	// Conditional to avoid printing un-used fields.
 	if (strlen($strip_region) > 0) {
@@ -177,7 +184,7 @@ function emit_single($strip_title, $description, $strip_sku, $strip_linkto, $str
 	return $output;
 }
 
-function GetCurrency($currency) {
+function LSWCF_get_currency($currency) {
 	switch ($currency) {
 		case 'US':
 			return ' USD';
