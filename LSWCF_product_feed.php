@@ -52,9 +52,9 @@ function LSWCF_product_feed_callback() {
 	$output = '<?xml version="1.0"?>' . PHP_EOL;
 	$output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">' . PHP_EOL;
 	$output .= "\t" . '<channel>' . PHP_EOL;
-	$output .= "\t\t" . '<title>' . esc_html(get_bloginfo( 'name' )) . '</title>' . PHP_EOL;
-	$output .= "\t\t" . '<description>' . esc_html(get_bloginfo( 'description' )) . '</description>' . PHP_EOL;
-	$output .= "\t\t" . '<link>' . esc_url(get_site_url()) . '</link>' . PHP_EOL;
+	$output .= "\t\t" . '<title>' . esc_html( sanitize_text_field( get_bloginfo( 'name' ) ) ) . '</title>' . PHP_EOL;
+	$output .= "\t\t" . '<description>' . esc_html( sanitize_text_field( get_bloginfo( 'description' ) ) ) . '</description>' . PHP_EOL;
+	$output .= "\t\t" . '<link>' . esc_url( sanitize_url( get_site_url() ) ) . '</link>' . PHP_EOL;
 
 	// Loop over all products.
 	foreach ( $products as $product ) {
@@ -66,59 +66,48 @@ function LSWCF_product_feed_callback() {
 			continue;
 		}
 
-		if ( $product_obj->is_type( 'variable' ) ) { // Run through variable product type.
+		$currency = LSWCF_get_currency( $product_obj->get_attribute( 'pa_region' ) );
+
+		// Sanitize the descriptions
+		$short_description = sanitize_text_field( $product->post_excerpt );
+		$long_description = sanitize_text_field( $product->post_content );
+
+		$title =        sanitize_text_field( $product->post_title );
+		$description =  strlen($short_description) > 0 ? $short_description : $long_description;
+		$image_link =   sanitize_text_field( wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0] );
+		$stock =        $product_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+		$price =        $product_obj->get_price() . $currency;
+		$region =       sanitize_text_field( $product_obj->get_attribute( 'pa_region' ) );
+		$color =        sanitize_text_field( $product_obj->get_attribute( 'pa_colour' ) );
+		$gpid =         sanitize_text_field( $product_obj->get_meta( 'google-product-id' ) );
+		$sku =          sanitize_text_field( $product_obj->get_sku() );
+		$id =           $product_obj->get_id();
+
+		// Run through variable product type.
+		// Overwrite specific variables if available from variation.
+		if ( $product_obj->is_type( 'variable' ) ) {
 			foreach ( $product_obj->get_available_variations() as $variation ) {
 				$variation_obj = new WC_Product_Variation( $variation['variation_id'] );
 
-				$currency = GetCurrency( $variation_obj->get_attribute( 'pa_region' ) );
+				$temp_link = sanitize_text_field( wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0] );
 
-				// Sanitize the descriptions
-				$short_description = $product->post_excerpt;
-				$long_description = $product->post_content;
-				$description = strlen($short_description) > 0 ? $short_description : $long_description;
+				//$title =    [ $product->post_title, get_the_title($variation['variation_id']) ];
+				$stock =      $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+				$region =     sanitize_text_field( $variation_obj->get_attribute( 'pa_region' ) );
+				$color =      sanitize_text_field( $variation_obj->get_attribute( 'pa_colour' ) );
+				$image_link = strlen( $temp_link ) > 0 ? $temp_link : $image_link;
+				//$sku =      [ $product_obj->get_sku(), $variation_obj->get_sku() ];
+				$price =      $variation_obj->get_price() .  $currency;
+				$id =         $variation_obj->get_id();
 
-				$stock = $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
-				$currency = LSWCF_get_currency( $variation_obj->get_attribute( 'pa_region' ) );
-
-				// Sanitize user product data
-				$region = $variation_obj->get_attribute( 'pa_region' );
-				$color = $variation_obj->get_attribute( 'pa_colour' );
-				$image_link = wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0];
-				$title = [ $product->post_title, get_the_title($variation['variation_id']) ];
-				$sku = [ $product_obj->get_sku(), $variation_obj->get_sku() ];
-				$price = $variation_obj->get_price() .  $currency;
-				$id = $variation_obj->get_id();
-
-				$GPID = $product_obj->get_meta( 'google-product-id' );
-
-				// Write one product to the output for this loop.
-				$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $GPID, true);
+				// Write one product to the output.
+				$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, true);
 			}
+			continue;
 		}
-		else { // Run througn static product type.
-			$currency = LSWCF_get_currency( $product_obj->get_attribute( 'pa_region' ) );
 
-			// Sanitize the descriptions
-			$short_description = $product->post_excerpt;
-			$long_description = $product->post_content;
-			$description = strlen($short_description) > 0 ? $short_description : $long_description;
-
-			$stock = $product_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
-
-			// Sanitize user product data
-			$region = $product_obj->get_attribute( 'pa_region' );
-			$color = $product_obj->get_attribute( 'pa_colour' );
-			$mage_link = wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0];
-			$title = $product->post_title;
-			$sku = $product_obj->get_sku();
-			$price = $product_obj->get_price() . $currency;
-			$id = $product_obj->get_id();
-
-			$GPID = $product_obj->get_meta( 'google-product-id' );
-
-			// Write one product to the output.
-			$output .= LSWCF_emit_single_filtered($title, $description, $sku, $mage_link, $color, $price, $stock, $id, $region, $GPID, false);
-		}
+		// Write one product to the output.
+		$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, false);
 	}
 
 	// Echo footer for RSS feed & return data.
@@ -133,50 +122,43 @@ function LSWCF_product_feed_callback() {
 	exit;
 }
 
-// Emit one product entry.
-function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $GPID, $is_variant) {
+// Emit one product entry - filters inputs.
+function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, $is_variant) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
 	// Output product stripped data as XML.
-	$output .= "\t\t\t" . '<g:title>' . htmlspecialchars($strip_title, ENT_XML1, 'UTF-8') . '</g:title>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:description><![CDATA[' . $description . ']]></g:description>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:sku>' . htmlspecialchars($strip_sku, ENT_XML1, 'UTF-8') . '</g:sku>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:image_link>' . htmlspecialchars($strip_linkto, ENT_XML1, 'UTF-8') . '</g:image_link>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:title>' . esc_html( $title ) . '</g:title>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:description><![CDATA[' . esc_html( $description ) . ']]></g:description>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:sku>' . esc_html( $sku ) . '</g:sku>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:image_link>' . esc_url( $image_link ) . '</g:image_link>' . PHP_EOL;
 
-	if (strlen($strip_color) > 0) {
-	    $output .= "\t\t\t" . '<color>' . htmlspecialchars($strip_color, ENT_XML1, 'UTF-8') . '</color>' . PHP_EOL;
+	if (strlen($color) > 0) {
+	    $output .= "\t\t\t" . '<color>' . esc_html( $color ) . '</color>' . PHP_EOL;
 	}
 
-	$output .= "\t\t\t" . '<g:brand>' . htmlspecialchars(wp_strip_all_tags(get_bloginfo('name')), ENT_XML1, 'UTF-8') . '</g:brand>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:mpn>' . htmlspecialchars($strip_sku . '-' . $id, ENT_XML1, 'UTF-8') . '</g:mpn>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:price>' . htmlspecialchars($price, ENT_XML1, 'UTF-8') . '</g:price>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:availability>' . htmlspecialchars($stock, ENT_XML1, 'UTF-8') . '</g:availability>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:brand>' . esc_html( sanitize_text_field( get_bloginfo( 'name' ) ) ) . '</g:brand>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:mpn>' . esc_html( $sku ) . '-' . esc_html( $id ) . '</g:mpn>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:price>' . esc_html( $price ) . '</g:price>' . PHP_EOL;
+	$output .= "\t\t\t" . '<g:availability>' . esc_html( $stock ) . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
-
-	if ( $is_variant ) {
-	    $output .= "\t\t\t" . '<g:id>' . wp_strip_all_tags( $strip_sku[1] ) . '</g:id>' . PHP_EOL;
-	    $output .= "\t\t\t" . '<g:item_group_id>' . wp_strip_all_tags( $strip_sku[0] ) . '</g:item_group_id>' . PHP_EOL;
-	}
-	else {
-	    $output .= "\t\t\t" . '<g:id>' . wp_strip_all_tags( $strip_sku ) . '</g:id>' . PHP_EOL;
-	}
+	$output .= "\t\t\t" . '<g:item_group_id>' . esc_html( $sku ) . '</g:item_group_id>' . PHP_EOL;
 
 	// Conditional to avoid printing un-used fields.
-	if (strlen($strip_region) > 0) {
-		$output .= "\t\t\t" . '<g:id>' . $id . '-' . $strip_region . '</g:id>' . PHP_EOL;
-		$output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . $strip_region . '</value></additional_variant_attribute>' . PHP_EOL;
-		$output .= "\t\t\t" . '<g:link>' . esc_url(get_permalink( $id )) . '?attribute_pa_region=' . $strip_region . '</g:link>' . PHP_EOL;
-		$output .= "\t\t\t" . '<g:region>' . $strip_region . '</g:region>' . PHP_EOL;
+	if (strlen($region) > 0) {
+		$output .= "\t\t\t" . '<g:id>' . $id . '-' . esc_html( $region ) . '</g:id>' . PHP_EOL;
+		$output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . esc_html( $region ) . '</value></additional_variant_attribute>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:link>' . esc_html( sanitize_url( get_permalink( $id ) ) ) . '?attribute_pa_region=' . esc_html( $region ) . '</g:link>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:region>' . esc_html( $region ) . '</g:region>' . PHP_EOL;
 	}
 	else {
-		$output .= "\t\t\t" . '<g:id>' . wp_strip_all_tags( $id ) . '</g:id>' . PHP_EOL;
-		$output .= "\t\t\t" . '<g:link>' . esc_url(get_permalink( $id )) . '</g:link>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:id>' . $id . '</g:id>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:link>' . esc_url( sanitize_url( get_permalink( $id ) ) ) . '</g:link>' . PHP_EOL;
 	}
 
 	// Adds a google product tag if present - this helps SEO.
-	if (strlen($GPID) > 0) {
-		$output .= "\t\t\t" . '<g:google_product_category>' . $GPID . '</g:google_product_category>' . PHP_EOL;
+	if (strlen($gpid) > 0) {
+		$output .= "\t\t\t" . '<g:google_product_category>' . esc_html( $gpid ) . '</g:google_product_category>' . PHP_EOL;
 	}
 
 	// End of product.
