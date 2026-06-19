@@ -77,7 +77,7 @@ function LSWCF_product_feed_callback() {
 		$title =        sanitize_text_field( $product->post_title );
 		$description =  strlen($short_description) > 0 ? $short_description : $long_description;
 		$image_link =   sanitize_text_field( wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0] );
-		$stock =        $product_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+		$stock =        LSWCF_get_stock_data( $product_obj );
 		$region =       sanitize_text_field( $product_obj->get_attribute( 'pa_region' ) );
 		$color =        sanitize_text_field( $product_obj->get_attribute( 'pa_colour' ) );
 		$price =        LSWCF_get_price_data( $product_obj, $region );
@@ -95,7 +95,7 @@ function LSWCF_product_feed_callback() {
 
 				$title =        [ $product->post_title, get_the_title($variation['variation_id']) ];
 				//$description =  strlen( $description )
-				$stock =        $variation_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
+				$stock =        LSWCF_get_stock_data( $variation_obj );
 				$region =       sanitize_text_field( $variation_obj->get_attribute( 'pa_region' ) );
 				$color =        sanitize_text_field( $variation_obj->get_attribute( 'pa_colour' ) );
 				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
@@ -241,6 +241,23 @@ function LSWCF_get_price_data( $product, $region ) {
         $product->get_sale_price() . $currency,
         $sale_dates
     ];
+}
+
+/**
+ * Convert and return a value for RSS stock value.
+ *
+ * @since 1.4.2
+ *
+ * @param type $product A woocommerce product object.
+ * @return string A string denoting the product's stock status. (In Stock, Backorder, Out of Stock).
+ */
+function LSWCF_get_stock_data( $product ) {
+    return match ( $product->get_stock_status() ) {
+        'instock' => 'In Stock',
+        'outofstock' => 'Out of stock',
+        'onbackorder' => 'Backorder',
+        default => $product->get_stock_status(),
+    };
 }
 
 add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'LSWCF_setup_view_feed_link' );
