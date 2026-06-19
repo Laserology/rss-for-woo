@@ -2,7 +2,7 @@
 Plugin Name: RSS feed for Woo
 Plugin URI: https://github.com/Laserology/rss-for-woo/
 Description: Free public XML/RSS feed for your woo store.
-Version: 1.4
+Version: 1.4.1
 Requires at least: 7.0
 Requires PHP: 7.4
 License: GPL v2 or later
@@ -12,6 +12,10 @@ Author URI: https://laserology.net/
 Requires Plugins: woocommerce
 Text Domain: rss-feed-for-woo
 */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // Add quick link to view the feed generated.
 function LSWCF_setup_view_feed_link( $links ) {
@@ -66,8 +70,6 @@ function LSWCF_product_feed_callback() {
 			continue;
 		}
 
-		$currency = LSWCF_get_currency( $product_obj->get_attribute( 'pa_region' ) );
-
 		// Sanitize the descriptions
 		$short_description = sanitize_text_field( $product->post_excerpt );
 		$long_description = sanitize_text_field( $product->post_content );
@@ -76,9 +78,9 @@ function LSWCF_product_feed_callback() {
 		$description =  strlen($short_description) > 0 ? $short_description : $long_description;
 		$image_link =   sanitize_text_field( wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0] );
 		$stock =        $product_obj->get_stock_status() == 'instock' ? 'In stock' : 'Out of stock';
-		$price =        $product_obj->get_price() . $currency;
 		$region =       sanitize_text_field( $product_obj->get_attribute( 'pa_region' ) );
 		$color =        sanitize_text_field( $product_obj->get_attribute( 'pa_colour' ) );
+		$price =        LSWCF_get_price_data( $product_obj, $region );
 		$gpid =         sanitize_text_field( $product_obj->get_meta( 'google-product-id' ) );
 		$sku =          sanitize_text_field( $product_obj->get_sku() );
 		$id =           $product_obj->get_id();
@@ -97,8 +99,8 @@ function LSWCF_product_feed_callback() {
 				$region =       sanitize_text_field( $variation_obj->get_attribute( 'pa_region' ) );
 				$color =        sanitize_text_field( $variation_obj->get_attribute( 'pa_colour' ) );
 				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
+				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
-				$price =        $variation_obj->get_price() .  $currency;
 				$id =           $variation_obj->get_id();
 
 				// Write one product to the output.
@@ -123,8 +125,24 @@ function LSWCF_product_feed_callback() {
 	exit;
 }
 
-// Emit one product entry - filters inputs.
-function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, $is_variant) {
+/**
+ * Emit one product entry - filters inputs.
+ *
+ * @since 1.4.1
+ *
+ * @param string $title A single string containing the product's title.
+ * @param string $description A single string containting the product's description.
+ * @param string $sku A single string containing the product's SKU.
+ * @param string $image_link A single string containing a URL pointing to the product's (or variation's) main image.
+ * @param string $color A single string containing the product's color.
+ * @param array $price_data An array containing prices. Index 1 being main price (always populated) and optionally 1 and 2 containing sale price and dates. Index 0 denotes if the array includes sale data.
+ * @param string $stock A single string containing the product's stock status.
+ * @param string $id A single string containting the product's internal woocommerce ID.
+ * @param string $region A single string containing the product's currency region.
+ * @param string $gpid A single string containing the product's google product ID (optional).
+ * @param type $is_variant Internal marker saying if the product is a single or variable product.
+ */
+function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $region, $gpid, $is_variant) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -151,12 +169,22 @@ function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $co
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . esc_html( $description ) . ']]></g:description>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:image_link>' . esc_url( $image_link ) . '</g:image_link>' . PHP_EOL;
 
-	if (strlen($color) > 0) {
+	if (strlen( $color ) > 0) {
 	    $output .= "\t\t\t" . '<color>' . esc_html( $color ) . '</color>' . PHP_EOL;
 	}
 
+	// Include sale price if it is on sale.
+	if ( $price_data[0] == true ) {
+	    $output .= "\t\t\t" . '<g:sale_price>' . esc_html( $price_data[2] ) . '</g:sale_price>' . PHP_EOL;
+
+		// Include sale dates, if provided.
+		if ( strlen( $price_data[3] ) > 0 ) {
+		    $output .= "\t\t\t" . '<g:sale_price_effective_date>' . esc_html( $price_data[3] ) . '</g:sale_price_effective_date>' . PHP_EOL;
+		}
+	}
+
+	$output .= "\t\t\t" . '<g:price>' . esc_html( $price_data[1] ) . '</g:price>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:brand>' . esc_html( sanitize_text_field( get_bloginfo( 'name' ) ) ) . '</g:brand>' . PHP_EOL;
-	$output .= "\t\t\t" . '<g:price>' . esc_html( $price ) . '</g:price>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:availability>' . esc_html( $stock ) . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
 
@@ -180,20 +208,39 @@ function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $co
 	return $output;
 }
 
-function LSWCF_get_currency($currency) {
-	switch ($currency) {
-		case 'US':
-			return ' USD';
-		case 'CA':
-			return ' CAD';
-		case 'EU':
-			return ' EUR';
-		case 'GB':
-			return ' GBP';
-		default:
-			// Default to USD if it doesn't exist in the list
-			return ' USD';
-	}
+/**
+ * Convert and return a date for google merchant center in ISO 8601 format.
+ *
+ * @since 1.4.1
+ *
+ * @param type $product A woocommerce product object.
+ * @param type $currency A string containing the product's currency.
+ * @return string An array. [0] = On sale or Normal price (bool) [1] = Normal price [2] = Sale price [3] = Sale dates.
+ */
+function LSWCF_get_price_data( $product, $region ) {
+	$from = $product->get_date_on_sale_from();
+    $to = $product->get_date_on_sale_to();
+	$sale_dates = "";
+
+    // Include sale dates, if they are set.
+    if ($from != null or $to != null) {
+        $sale_dates = $from->__toString() . '/' . $to->__toString();
+    }
+
+    $currency = match ( $region ) {
+		'US' => ' USD',
+		'CA' => ' CAD',
+		'EU' => ' EUR',
+		'GB' => ' GBP',
+		default => ' USD', // Default to USD if it doesn't exist in the list
+	};
+
+    return [
+        $product->is_on_sale(),
+        $product->get_regular_price() . $currency,
+        $product->get_sale_price() . $currency,
+        $sale_dates
+    ];
 }
 
 add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'LSWCF_setup_view_feed_link' );
