@@ -188,6 +188,12 @@ function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $co
 	$output .= "\t\t\t" . '<g:availability>' . esc_html( $stock ) . '</g:availability>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:condition>New</g:condition>' . PHP_EOL;
 
+	// Use at own risk. Unknown if google will flag ever-changing available dates as suspicous or not.
+	if ( $stock == "Backorder" ) {
+	    $tomorrow = new WC_DateTime( '+2 days' );
+	    $output .= "\t\t\t" . '<g:availability_date>' . esc_html( $tomorrow->__toString() ) . '</g:availability_date>' . PHP_EOL;
+	}
+
 	// Conditional to avoid printing un-used fields.
 	if (strlen($region) > 0) {
 		$output .= "\t\t\t" . '<additional_variant_attribute><label>Region</label><value>' . esc_html( $region ) . '</value></additional_variant_attribute>' . PHP_EOL;
@@ -254,9 +260,8 @@ function LSWCF_get_price_data( $product, $region ) {
 function LSWCF_get_stock_data( $product ) {
     return match ( $product->get_stock_status() ) {
         'instock' => 'In Stock',
-        'outofstock' => 'Out of stock',
-        'onbackorder' => 'Backorder',
-        default => $product->get_stock_status(),
+        'onbackorder' => 'Out of stock', // Would be 'Backorder' but the constantly changing dates might be suspicous?
+        default => 'Out of stock',
     };
 }
 
