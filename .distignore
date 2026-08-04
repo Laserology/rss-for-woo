@@ -6,4 +6,5 @@
 .gitattributes
 .distignore
 .gitignore
+deploy.sh
 icon-256x256.xcf
