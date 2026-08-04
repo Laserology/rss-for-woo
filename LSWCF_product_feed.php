@@ -78,12 +78,14 @@ function LSWCF_product_feed_callback() {
 		$description =  strlen($short_description) > 0 ? $short_description : $long_description;
 		$image_link =   sanitize_text_field( wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0] );
 		$stock =        LSWCF_get_stock_data( $product_obj );
-		$region =       sanitize_text_field( $product_obj->get_attribute( 'pa_region' ) );
-		$color =        sanitize_text_field( $product_obj->get_attribute( 'pa_colour' ) );
 		$price =        LSWCF_get_price_data( $product_obj, $region );
 		$gpid =         sanitize_text_field( $product_obj->get_meta( 'google-product-id' ) );
 		$sku =          sanitize_text_field( $product_obj->get_sku() );
 		$id =           $product_obj->get_id();
+		$region =       "";
+		$color =        "";
+		$attributes =   [];
+
 
 		// Run through variable product type.
 		// Overwrite specific variables if available from variation.
@@ -94,23 +96,38 @@ function LSWCF_product_feed_callback() {
 				$temp_link = sanitize_text_field( wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0] );
 
 				$title =        [ $product->post_title, get_the_title($variation['variation_id']) ];
-				//$description =  strlen( $description )
 				$stock =        LSWCF_get_stock_data( $variation_obj );
-				$region =       sanitize_text_field( $variation_obj->get_attribute( 'pa_region' ) );
-				$color =        sanitize_text_field( $variation_obj->get_attribute( 'pa_colour' ) );
 				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
 				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
 				$id =           $variation_obj->get_id();
 
+				// Extract product attributes into a list.
+				foreach ( $variation_obj->get_attributes() as $name => $value ) {
+					//$name = str_replace( "pa_", "", strtolower( $name ) );
+
+				    if ( $name == "region") {
+						$region = sanitize_text_field( $value );
+					}
+                    elseif ( $name == "pa_color" || $name == "pa_colour" || $name == "color" || $name == "colour" ) {
+                        $color = sanitize_text_field( $value );
+                    }
+                    else {
+                        $attributes[] = [
+                            sanitize_text_field( $name ),
+                            sanitize_text_field( $value )
+                        ];
+                    }
+                }
+
 				// Write one product to the output.
-				$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, true);
+				$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, $attributes, $region, $gpid, true);
 			}
 			continue;
 		}
 
 		// Write one product to the output.
-		$output .= LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price, $stock, $id, $region, $gpid, false);
+		$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false);
 	}
 
 	// Echo footer for RSS feed & return data.
@@ -142,7 +159,7 @@ function LSWCF_product_feed_callback() {
  * @param string $gpid A single string containing the product's google product ID (optional).
  * @param type $is_variant Internal marker saying if the product is a single or variable product.
  */
-function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $region, $gpid, $is_variant) {
+function LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -164,6 +181,14 @@ function LSWCF_emit_single_filtered($title, $description, $sku, $image_link, $co
 		$output .= "\t\t\t" . '<g:mpn>' . esc_html( $sku ) . '-' . esc_html($id) . '</g:mpn>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:sku>' . esc_html( $sku ) . '</g:sku>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:id>' . esc_html( $sku ) . '</g:id>' . PHP_EOL;
+	}
+
+	// Output product attributes that have been specified.
+	foreach ( $attributes as $attribute ) {
+	    $output .= "\t\t\t" . '<g:variant_option>' . PHP_EOL;
+		$output .= "\t\t\t\t" . '<g:name>' . esc_html( $attribute[0] ) . '</g:name>' . PHP_EOL;
+		$output .= "\t\t\t\t" . '<g:value>' . esc_html( $attribute[1] ) . '</g:value>' . PHP_EOL;
+        $output .= "\t\t\t" . '</g:variant_option>' . PHP_EOL;
 	}
 
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . esc_html( $description ) . ']]></g:description>' . PHP_EOL;
