@@ -2,9 +2,9 @@
 Plugin Name: RSS feed for Woo
 Plugin URI: https://github.com/Laserology/rss-for-woo/
 Description: Free public XML/RSS feed for your woo store.
-Version: 1.4.1
+Version: 1.4.2
 Requires at least: 7.0
-Requires PHP: 7.4
+Requires PHP: 8.0
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Author: Laserology, vladjpuscasu
@@ -70,6 +70,8 @@ function LSWCF_product_feed_callback() {
 			continue;
 		}
 
+		[ $attributes, $region, $color ] = LSWCF_get_attributes( $product_obj );
+
 		// Sanitize the descriptions
 		$short_description = sanitize_text_field( $product->post_excerpt );
 		$long_description = sanitize_text_field( $product->post_content );
@@ -82,10 +84,6 @@ function LSWCF_product_feed_callback() {
 		$gpid =         sanitize_text_field( $product_obj->get_meta( 'google-product-id' ) );
 		$sku =          sanitize_text_field( $product_obj->get_sku() );
 		$id =           $product_obj->get_id();
-		$region =       "";
-		$color =        "";
-		$attributes =   [];
-
 
 		// Run through variable product type.
 		// Overwrite specific variables if available from variation.
@@ -95,6 +93,8 @@ function LSWCF_product_feed_callback() {
 
 				$temp_link = sanitize_text_field( wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0] );
 
+				[ $attributes, $region, $color ] = LSWCF_get_attributes( $variation_obj );
+
 				$title =        [ $product->post_title, get_the_title($variation['variation_id']) ];
 				$stock =        LSWCF_get_stock_data( $variation_obj );
 				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
@@ -102,32 +102,16 @@ function LSWCF_product_feed_callback() {
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
 				$id =           $variation_obj->get_id();
 
-				// Extract product attributes into a list.
-				foreach ( $variation_obj->get_attributes() as $name => $value ) {
-					//$name = str_replace( "pa_", "", strtolower( $name ) );
-
-				    if ( $name == "region") {
-						$region = sanitize_text_field( $value );
-					}
-                    elseif ( $name == "pa_color" || $name == "pa_colour" || $name == "color" || $name == "colour" ) {
-                        $color = sanitize_text_field( $value );
-                    }
-                    else {
-                        $attributes[] = [
-                            sanitize_text_field( $name ),
-                            sanitize_text_field( $value )
-                        ];
-                    }
-                }
-
 				// Write one product to the output.
 				$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, $attributes, $region, $gpid, true);
 			}
+
+			// Go to next product.
 			continue;
 		}
 
 		// Write one product to the output.
-		$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false);
+		$output .= LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false );
 	}
 
 	// Echo footer for RSS feed & return data.
@@ -159,7 +143,7 @@ function LSWCF_product_feed_callback() {
  * @param string $gpid A single string containing the product's google product ID (optional).
  * @param type $is_variant Internal marker saying if the product is a single or variable product.
  */
-function LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant) {
+function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant ) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -237,6 +221,37 @@ function LSWCF_emit_single($title, $description, $sku, $image_link, $color, $pri
 	// End of product.
 	$output .= "\t\t" . '</item>' . PHP_EOL;
 	return $output;
+}
+
+/**
+ * Extract product attributes, splitting region and color out from the rest.
+ *
+ * @since 1.4.2
+ *
+ * @param WC_Product $product A woocommerce product object.
+ * @return array An array containing [0] = List of general attributes (name/value pairs), [1] = Region (if set), [2] = Color (if set).
+ */
+function LSWCF_get_attributes( $product ) {
+	$attributes = [];
+	$region = "";
+	$color = "";
+
+	foreach ( $product->get_attributes() as $name => $value ) {
+		if ( $name == "region" ) {
+			$region = sanitize_text_field( $value );
+		}
+		elseif ( $name == "pa_color" || $name == "pa_colour" || $name == "color" || $name == "colour" ) {
+			$color = sanitize_text_field( $value );
+		}
+		else {
+			$attributes[] = [
+				sanitize_text_field( $name ),
+				sanitize_text_field( $value )
+			];
+		}
+	}
+
+	return [ $attributes, $region, $color ];
 }
 
 /**
