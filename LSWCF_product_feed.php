@@ -161,10 +161,11 @@ function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $pr
         $output .= "\t\t\t" . '<g:id>' . esc_html( $fsku ) . '</g:id>' . PHP_EOL;
 	}
 	else {
-	    $output .= "\t\t\t" . '<g:title>' . esc_html( $title ) . '</g:title>' . PHP_EOL;
+		$fid = strlen( $sku ) == 0 ? $id : $sku;
+ 	    $output .= "\t\t\t" . '<g:title>' . esc_html( $title ) . '</g:title>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:mpn>' . esc_html( $sku ) . '-' . esc_html($id) . '</g:mpn>' . PHP_EOL;
 		$output .= "\t\t\t" . '<g:sku>' . esc_html( $sku ) . '</g:sku>' . PHP_EOL;
-		$output .= "\t\t\t" . '<g:id>' . esc_html( $sku ) . '</g:id>' . PHP_EOL;
+		$output .= "\t\t\t" . '<g:id>' . esc_html( $fid ) . '</g:id>' . PHP_EOL;
 	}
 
 	// Output product attributes that have been specified.
@@ -179,7 +180,7 @@ function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $pr
 	$output .= "\t\t\t" . '<g:image_link>' . esc_url( $image_link ) . '</g:image_link>' . PHP_EOL;
 
 	if (strlen( $color ) > 0) {
-	    $output .= "\t\t\t" . '<color>' . esc_html( $color ) . '</color>' . PHP_EOL;
+ 	    $output .= "\t\t\t" . '<g:color>' . esc_html( $color ) . '</g:color>' . PHP_EOL;
 	}
 
 	// Include sale price if it is on sale.
