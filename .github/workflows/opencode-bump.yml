@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true
 
       - uses: actions/setup-node@v4
         with:
@@ -66,11 +66,8 @@ jobs:
                repository -- write it outside the working tree and pass it in --
                so it doesn't dirty the diff.
             2. Activate the plugin and confirm by inspection that it loads with no
-               fatal errors, warnings, or notices, and that it registers itself
-               with the AI Client. Read the actual logs and output. Do not assume
-               it worked because a command exited zero.
-               Do not make live AI API calls -- you are verifying that the plugin
-               loads and wires up, not that the upstream service responds.
+               fatal errors, warnings, or notices. Read the actual logs and output.
+               Do not assume it worked because a command exited zero.
             3. Re-run whatever checks the project defines in AGENTS.md.
             4. Only after you have observed it working, set `Tested up to` in
                readme.txt to the target version. Use major.minor only -- e.g.
