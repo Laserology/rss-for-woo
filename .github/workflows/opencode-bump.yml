@@ -1,0 +1,89 @@
+name: OpenCode bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target WordPress major.minor
+        required: true
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: opencode-bump-${{ github.event.issue.number || inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  opencode:
+    # dispatch runs unconditionally; the comment path needs /oc from a maintainer
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.issue.title == 'WordPress compatibility check' &&
+        contains(github.event.comment.body, '/oc') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run OpenCode
+        uses: dceoy/opencode-action@0ff64486494c3134c46df6ce0e51eda4a64e349f  # v0.7.3
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          model: opencode-go/deepseek-v4.1-flash
+          timeout-minutes: '30'
+          prompt: |
+            Before anything else, read the AGENTS.md at the repository root and
+            follow it. It describes this project's conventions and how to set up
+            and test the project. If there is no AGENTS.md, say so and proceed
+            with your best judgement.
+
+            Context: the declared WordPress compatibility is behind. The target
+            version is ${{ inputs.target }}. If that is empty, read the open
+            tracking issue titled "WordPress compatibility check" and take the
+            target version from its body.
+
+            Task:
+
+            1. Stand up a local WordPress environment running the TARGET version,
+               with this repository installed as a plugin. Docker and Node are
+               available on the runner. Keep environment config out of the
+               repository -- write it outside the working tree and pass it in --
+               so it doesn't dirty the diff.
+            2. Activate the plugin and confirm by inspection that it loads with no
+               fatal errors, warnings, or notices, and that it registers itself
+               with the AI Client. Read the actual logs and output. Do not assume
+               it worked because a command exited zero.
+               Do not make live AI API calls -- you are verifying that the plugin
+               loads and wires up, not that the upstream service responds.
+            3. Re-run whatever checks the project defines in AGENTS.md.
+            4. Only after you have observed it working, set `Tested up to` in
+               readme.txt to the target version. Use major.minor only -- e.g.
+               `7.2`, never `7.2.1`. Change nothing else: not `Stable tag`, not
+               `Version`, not the plugin header, not CHANGELOG.md.
+            5. Open a pull request titled "Bump Tested up to to <target version>".
+               If an open pull request for this already exists, update it rather
+               than opening a second one.
+
+            In the PR description, record every command you ran and its result,
+            state exactly what you verified by hand versus what you did not, and
+            report anything that failed. If you could not get the environment
+            running, say so plainly and do not claim compatibility.
+
+            Never state that a version is supported unless you observed the plugin
+            working on it.
