@@ -13,7 +13,6 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
-  id-token: write
 
 concurrency:
   group: opencode-bump-${{ github.event.issue.number || inputs.target }}
@@ -46,6 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           model: opencode-go/deepseek-v4.1-flash
+          use-github-token: true
           timeout-minutes: '30'
           prompt: |
             Before anything else, read the AGENTS.md at the repository root and
