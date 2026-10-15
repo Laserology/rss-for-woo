@@ -1,0 +1,65 @@
+name: WordPress version watch
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # daily, 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write          # required to dispatch the bump workflow
+
+env:
+  ISSUE_TITLE: 'WordPress compatibility check'
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare Tested up to against latest WordPress
+        id: diff
+        run: |
+          set -euo pipefail
+          tracked=$(sed -n 's/^Tested up to:[[:space:]]*//p' readme.txt | tr -d '[:space:]' | cut -d. -f1,2)
+          latest=$(curl -fsSL https://api.wordpress.org/core/version-check/1.7/ | jq -r '.offers[0].current' | cut -d. -f1,2)
+          echo "tracked=$tracked latest=$latest"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          # fire only when the latest minor is ahead of what we declare
+          newest=$(printf '%s\n%s\n' "$tracked" "$latest" | sort -V | tail -1)
+          if [ "$newest" != "$tracked" ]; then
+            printf 'Plugin is tested up to `%s`, but WordPress `%s` is out.\n' "$tracked" "$latest" > body.txt
+            echo "dirty=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "dirty=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Reconcile tracking issue
+        id: issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          num=$(gh issue list --state open --search "in:title $ISSUE_TITLE" --json number --jq '.[0].number // empty')
+          if [ "${{ steps.diff.outputs.dirty }}" = "true" ]; then
+            if [ -n "$num" ]; then
+              gh issue edit "$num" --body "$(cat body.txt)"
+              echo "created=false" >> "$GITHUB_OUTPUT"
+            else
+              gh issue create --title "$ISSUE_TITLE" --body "$(cat body.txt)"
+              echo "created=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            if [ -n "$num" ]; then
+              gh issue close "$num" --comment "Tested up to is current again."
+            fi
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Kick off the bump agent
+        if: steps.issue.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run opencode-bump.yml -f target="${{ steps.diff.outputs.latest }}"
