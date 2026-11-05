@@ -88,6 +88,8 @@ function LSWCF_product_feed_callback() {
 		// Run through variable product type.
 		// Overwrite specific variables if available from variation.
 		if ( $product_obj->is_type( 'variable' ) ) {
+			$used_feed_ids = [];
+
 			foreach ( $product_obj->get_available_variations() as $variation ) {
 				$variation_obj = new WC_Product_Variation( $variation['variation_id'] );
 
@@ -102,9 +104,17 @@ function LSWCF_product_feed_callback() {
 				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
 				$id =           $variation_obj->get_id();
+				$feed_id =      LSWCF_get_variation_feed_id( $product_obj->get_sku(), $product_obj->get_id(), $variation_obj );
+
+				// Siblings can be indistinguishable by both SKU and attributes.
+				if ( isset( $used_feed_ids[ $feed_id ] ) ) {
+					$feed_id .= '-v' . $id;
+				}
+
+				$used_feed_ids[ $feed_id ] = true;
 
 				// Write one product to the output.
-				$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, $attributes, $region, $gpid, true, $additional_images);
+				$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, $attributes, $region, $gpid, true, $additional_images, $feed_id);
 			}
 
 			// Go to next product.
@@ -144,8 +154,9 @@ function LSWCF_product_feed_callback() {
  * @param string $gpid A single string containing the product's google product ID (optional).
  * @param type $is_variant Internal marker saying if the product is a single or variable product.
  * @param array $additional_images Optional list of extra image URLs belonging to this item.
+ * @param string $feed_id Optional item ID that overrides the one derived from the SKU.
  */
-function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant, $additional_images = [] ) {
+function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant, $additional_images = [], $feed_id = '' ) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -160,7 +171,7 @@ function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $pr
         $output .= "\t\t\t" . '<g:item_group_id>' . esc_html( $sku[0] ) . '</g:item_group_id>' . PHP_EOL;
         $output .= "\t\t\t" . '<g:mpn>' . esc_html( $fsku ) . '-' . esc_html( $id ) . '</g:mpn>' . PHP_EOL;
         $output .= "\t\t\t" . '<g:sku>' . esc_html( $fsku ) . '</g:sku>' . PHP_EOL;
-        $output .= "\t\t\t" . '<g:id>' . esc_html( $fsku ) . '</g:id>' . PHP_EOL;
+        $output .= "\t\t\t" . '<g:id>' . esc_html( strlen( $feed_id ) > 0 ? $feed_id : $fsku ) . '</g:id>' . PHP_EOL;
 	}
 	else {
 		$fid = strlen( $sku ) == 0 ? $id : $sku;
@@ -392,6 +403,68 @@ function LSWCF_get_additional_images( $variation ) {
 	// Only report a gallery that is genuinely a list; a single extra image adds
 	// nothing the item's own image_link does not already cover.
 	return count( $images ) > 1 ? $images : [];
+}
+
+/**
+ * Build the item ID Google uses to track a variation.
+ *
+ * A variation's own SKU is used verbatim when it has one, so existing item IDs stay
+ * stable across re-imports and migrations. Variations without a SKU are identified
+ * by the parent's SKU plus a signature of their attribute values, which keeps every
+ * sibling distinct instead of collapsing them all onto the parent SKU.
+ *
+ * Raw attribute values are used rather than their labels, so renaming a term does
+ * not hand the item a new identity.
+ *
+ * @since 1.4.3
+ *
+ * @param string     $parent_sku The parent product's SKU. May be empty.
+ * @param int        $parent_id The parent product's ID.
+ * @param WC_Product $variation The variation object.
+ * @return string The value to submit as the item's g:id.
+ */
+function LSWCF_get_variation_feed_id( $parent_sku, $parent_id, $variation ) {
+	$variation_sku = sanitize_text_field( $variation->get_sku() );
+
+	if ( strlen( $variation_sku ) > 0 ) {
+		return $variation_sku;
+	}
+
+	$parent_sku = sanitize_text_field( $parent_sku );
+	$base = strlen( $parent_sku ) > 0 ? $parent_sku : 'p' . $parent_id;
+
+	$values = [];
+
+	if ( is_callable( [ $variation, 'get_attributes' ] ) ) {
+		foreach ( $variation->get_attributes() as $value ) {
+			if ( is_string( $value ) && strlen( $value ) > 0 ) {
+				$values[] = $value;
+			}
+		}
+	}
+
+	// Nothing distinguishes this variation from its siblings, so the ID must.
+	if ( empty( $values ) ) {
+		return $base . '-v' . $variation->get_id();
+	}
+
+	sort( $values );
+
+	$signature = strtolower( implode( ' ', $values ) );
+	$signature = trim( preg_replace( '/[^a-z0-9]+/', '-', $signature ), '-' );
+
+	if ( strlen( $signature ) > 40 ) {
+		$signature = substr( $signature, 0, 32 ) . '-' . substr( md5( $signature ), 0, 7 );
+	}
+
+	$item_id = $base . '-' . $signature;
+
+	// Keep the item ID inside the length Google accepts.
+	if ( strlen( $item_id ) > 50 ) {
+		$item_id = substr( $base, 0, 24 ) . '-' . substr( md5( $base . '|' . $signature ), 0, 7 );
+	}
+
+	return $item_id;
 }
 
 /**
