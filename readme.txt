@@ -46,6 +46,7 @@ To add the property, search how to enable the "custom fields" menu from the scre
 == Changelog ==
 = 1.4.3 =
 * Report a variation's own gallery images as additional image links, when it has more than one.
+* Include variation attribute values in variation titles so variants are distinguishable.
 
 = 1.4.2 =
 * Updated for WordPress 7.1 compatibility.

@@ -95,7 +95,7 @@ function LSWCF_product_feed_callback() {
 
 				[ $attributes, $region, $color ] = LSWCF_get_attributes( $variation_obj );
 
-				$title =        [ $product->post_title, get_the_title($variation['variation_id']) ];
+				$title =        [ $product->post_title, LSWCF_get_variation_title( $product->post_title, $variation_obj ) ];
 				$stock =        LSWCF_get_stock_data( $variation_obj );
 				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
 				$additional_images = LSWCF_get_additional_images( $variation_obj );
@@ -260,6 +260,88 @@ function LSWCF_get_attributes( $product ) {
 	}
 
 	return [ $attributes, $region, $color ];
+}
+
+/**
+ * Build a title for a variation that makes it distinguishable from its siblings.
+ *
+ * WooCommerce variation titles are frequently empty, or omit the attribute values
+ * that separate one variant from another - every variant of a product then carries
+ * the same title. Google cannot tell two items in an item group apart unless they
+ * differ visibly, so any attribute value missing from the title is appended.
+ *
+ * @since 1.4.3
+ *
+ * @param string     $parent_title The parent product's title.
+ * @param WC_Product $variation The variation object.
+ * @return string The title to use for this variation.
+ */
+function LSWCF_get_variation_title( $parent_title, $variation ) {
+	$title = sanitize_text_field( get_the_title( $variation->get_id() ) );
+
+	// Fall back to the parent name when the variation has no title of its own.
+	if ( strlen( $title ) == 0 ) {
+		$title = sanitize_text_field( $parent_title );
+	}
+
+	if ( ! is_callable( [ $variation, 'get_attributes' ] ) ) {
+		return $title;
+	}
+
+	foreach ( $variation->get_attributes() as $name => $value ) {
+		$label = LSWCF_get_attribute_label( $name, $value );
+
+		if ( strlen( $label ) == 0 ) {
+			continue;
+		}
+
+		// Leave titles that already mention the value alone.
+		$found = function_exists( 'mb_stripos' )
+			? mb_stripos( $title, $label )
+			: stripos( $title, $label );
+
+		if ( false !== $found ) {
+			continue;
+		}
+
+		// Google truncates very long titles, so don't push one past the limit.
+		if ( strlen( $title . ' - ' . $label ) > 150 ) {
+			continue;
+		}
+
+		$title .= ' - ' . $label;
+	}
+
+	return $title;
+}
+
+/**
+ * Resolve a variation attribute value to the label a customer would see.
+ *
+ * Taxonomy backed attributes are stored on variations as term slugs, so the term
+ * name is used where it can be resolved. Custom (local) attributes already hold
+ * their label and are returned as-is.
+ *
+ * @since 1.4.3
+ *
+ * @param string $name The attribute name, for example pa_size.
+ * @param mixed  $value The attribute value.
+ * @return string The label, or an empty string when there is nothing usable.
+ */
+function LSWCF_get_attribute_label( $name, $value ) {
+	if ( ! is_string( $value ) || strlen( $value ) == 0 ) {
+		return '';
+	}
+
+	if ( taxonomy_exists( $name ) ) {
+		$term = get_term_by( 'slug', $value, $name );
+
+		if ( $term && ! is_wp_error( $term ) ) {
+			return sanitize_text_field( $term->name );
+		}
+	}
+
+	return sanitize_text_field( $value );
 }
 
 /**
