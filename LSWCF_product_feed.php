@@ -78,7 +78,7 @@ function LSWCF_product_feed_callback() {
 
 		$title =        sanitize_text_field( $product->post_title );
 		$description =  strlen($short_description) > 0 ? $short_description : $long_description;
-		$image_link =   sanitize_text_field( wp_get_attachment_image_src( $product_obj->get_image_id(), 'full' )[0] );
+		$image_link =   LSWCF_get_image_url( $product_obj->get_image_id() );
 		$stock =        LSWCF_get_stock_data( $product_obj );
 		$price =        LSWCF_get_price_data( $product_obj, $region );
 		$gpid =         sanitize_text_field( $product_obj->get_meta( 'google-product-id' ) );
@@ -90,16 +90,19 @@ function LSWCF_product_feed_callback() {
 		if ( $product_obj->is_type( 'variable' ) ) {
 			$used_feed_ids = [];
 
+			// Kept untouched so variations without an image can fall back to it.
+			$parent_image_link = $image_link;
+
 			foreach ( $product_obj->get_available_variations() as $variation ) {
 				$variation_obj = new WC_Product_Variation( $variation['variation_id'] );
 
-				$temp_link = sanitize_text_field( wp_get_attachment_image_src( $variation_obj->get_image_id(), 'full' )[0] );
+				$variation_image = LSWCF_get_image_url( $variation_obj->get_image_id() );
 
 				[ $attributes, $region, $color ] = LSWCF_get_attributes( $variation_obj );
 
 				$title =        [ $product->post_title, LSWCF_get_variation_title( $product->post_title, $variation_obj ) ];
 				$stock =        LSWCF_get_stock_data( $variation_obj );
-				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
+				$image_link =   strlen( $variation_image ) > 0 ? $variation_image : $parent_image_link;
 				$additional_images = LSWCF_get_additional_images( $variation_obj );
 				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
@@ -271,6 +274,31 @@ function LSWCF_get_attributes( $product ) {
 	}
 
 	return [ $attributes, $region, $color ];
+}
+
+/**
+ * Resolve an attachment ID to a full size image URL.
+ *
+ * wp_get_attachment_image_src() returns false when an attachment is missing, which
+ * previously surfaced as a PHP warning and an unusable image_link.
+ *
+ * @since 1.4.3
+ *
+ * @param int|string $attachment_id The attachment ID. May be empty.
+ * @return string The image URL, or an empty string when there is none.
+ */
+function LSWCF_get_image_url( $attachment_id ) {
+	if ( empty( $attachment_id ) ) {
+		return '';
+	}
+
+	$image_src = wp_get_attachment_image_src( (int) $attachment_id, 'full' );
+
+	if ( ! is_array( $image_src ) || empty( $image_src[0] ) ) {
+		return '';
+	}
+
+	return $image_src[0];
 }
 
 /**
