@@ -122,7 +122,8 @@ function LSWCF_product_feed_callback() {
 		}
 
 		// Write one product to the output.
-		$output .= LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false );
+		$additional_images = LSWCF_get_additional_images( $product_obj );
+		$output .= LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false, $additional_images );
 	}
 
 	// Echo footer for RSS feed & return data.
@@ -356,27 +357,28 @@ function LSWCF_get_attribute_label( $name, $value ) {
 }
 
 /**
- * Collect a variation's own gallery images for use as additional_image_link entries.
+ * Collect an item's own gallery images for use as additional_image_link entries.
  *
- * Only images attached to the variation itself are returned; the parent product's
- * gallery is never used as a fallback. A variation without its own gallery yields an
- * empty array, so no additional_image_link elements are emitted for it. A variation
- * with a single gallery image is treated the same way: one extra image is not a list.
+ * Only images attached to the item itself are returned; nothing is inherited from a
+ * parent product. An item without its own gallery yields an empty array, so no
+ * additional_image_link elements are emitted for it. An item with a single gallery
+ * image is treated the same way: one extra image is not a list.
  *
  * @since 1.4.3
  *
- * @param WC_Product $variation A woocommerce variation object.
- * @return array A list of image URLs when the variation has two or more gallery
- *               images, capped at the 10 that Google accepts.
+ * @param WC_Product $product A woocommerce product or variation object.
+ * @return array A list of image URLs when the item has two or more gallery images,
+ *               capped at the 10 that Google accepts.
  */
-function LSWCF_get_additional_images( $variation ) {
-	// Variation galleries are only exposed by newer WooCommerce releases, and the
-	// feature is still flag-gated in some of them. Skip silently when unavailable.
-	if ( ! is_callable( [ $variation, 'get_gallery_image_ids' ] ) ) {
+function LSWCF_get_additional_images( $product ) {
+	// Gallery accessors are only exposed by newer WooCommerce releases, and the
+	// variation gallery feature is still flag-gated in some of them. Skip silently
+	// when unavailable.
+	if ( ! is_callable( [ $product, 'get_gallery_image_ids' ] ) ) {
 		return [];
 	}
 
-	$attachment_ids = $variation->get_gallery_image_ids();
+	$attachment_ids = $product->get_gallery_image_ids();
 
 	if ( ! is_array( $attachment_ids ) || empty( $attachment_ids ) ) {
 		return [];
