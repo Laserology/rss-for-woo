@@ -47,6 +47,7 @@ To add the property, search how to enable the "custom fields" menu from the scre
 = 1.4.3 =
 * Report a variation's own gallery images as additional image links, when it has more than one.
 * Include variation attribute values in variation titles so variants are distinguishable.
+* Give variations without a SKU their own item ID instead of reusing the parent SKU.
 
 = 1.4.2 =
 * Updated for WordPress 7.1 compatibility.
