@@ -3,7 +3,7 @@ Contributors: laserology, vladjpuscasu
 Tags: woo, product feed, google marketplace, rss, rss feed
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -44,6 +44,9 @@ For every product, you should add an extra field called 'google-product-id', and
 To add the property, search how to enable the "custom fields" menu from the screen options.
 
 == Changelog ==
+= 1.4.3 =
+* Report a variation's own gallery images as additional image links, when it has more than one.
+
 = 1.4.2 =
 * Updated for WordPress 7.1 compatibility.
 

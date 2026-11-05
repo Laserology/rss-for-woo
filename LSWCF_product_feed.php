@@ -2,7 +2,7 @@
 Plugin Name: RSS feed for Woo
 Plugin URI: https://github.com/Laserology/rss-for-woo/
 Description: Free public XML/RSS feed for your woo store.
-Version: 1.4.2
+Version: 1.4.3
 Requires at least: 7.0
 Requires PHP: 8.0
 License: GPL v2 or later
@@ -98,12 +98,13 @@ function LSWCF_product_feed_callback() {
 				$title =        [ $product->post_title, get_the_title($variation['variation_id']) ];
 				$stock =        LSWCF_get_stock_data( $variation_obj );
 				$image_link =   strlen( $temp_link ) > 0 ? $temp_link : $image_link;
+				$additional_images = LSWCF_get_additional_images( $variation_obj );
 				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
 				$id =           $variation_obj->get_id();
 
 				// Write one product to the output.
-				$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, $attributes, $region, $gpid, true);
+				$output .= LSWCF_emit_single($title, $description, $sku, $image_link, $color, $price, $stock, $id, $attributes, $region, $gpid, true, $additional_images);
 			}
 
 			// Go to next product.
@@ -142,8 +143,9 @@ function LSWCF_product_feed_callback() {
  * @param string $region A single string containing the product's currency region.
  * @param string $gpid A single string containing the product's google product ID (optional).
  * @param type $is_variant Internal marker saying if the product is a single or variable product.
+ * @param array $additional_images Optional list of extra image URLs belonging to this item.
  */
-function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant ) {
+function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price_data, $stock, $id, $attributes, $region, $gpid, $is_variant, $additional_images = [] ) {
 	// Begin new product.
 	$output = "\t\t" . '<item>' . PHP_EOL;
 
@@ -178,6 +180,11 @@ function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $pr
 
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . esc_html( $description ) . ']]></g:description>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:image_link>' . esc_url( $image_link ) . '</g:image_link>' . PHP_EOL;
+
+	// Additional images are only emitted when the item carries its own gallery.
+	foreach ( $additional_images as $additional_image ) {
+		$output .= "\t\t\t" . '<g:additional_image_link>' . esc_url( $additional_image ) . '</g:additional_image_link>' . PHP_EOL;
+	}
 
 	if (strlen( $color ) > 0) {
  	    $output .= "\t\t\t" . '<g:color>' . esc_html( $color ) . '</g:color>' . PHP_EOL;
@@ -253,6 +260,56 @@ function LSWCF_get_attributes( $product ) {
 	}
 
 	return [ $attributes, $region, $color ];
+}
+
+/**
+ * Collect a variation's own gallery images for use as additional_image_link entries.
+ *
+ * Only images attached to the variation itself are returned; the parent product's
+ * gallery is never used as a fallback. A variation without its own gallery yields an
+ * empty array, so no additional_image_link elements are emitted for it. A variation
+ * with a single gallery image is treated the same way: one extra image is not a list.
+ *
+ * @since 1.4.3
+ *
+ * @param WC_Product $variation A woocommerce variation object.
+ * @return array A list of image URLs when the variation has two or more gallery
+ *               images, capped at the 10 that Google accepts.
+ */
+function LSWCF_get_additional_images( $variation ) {
+	// Variation galleries are only exposed by newer WooCommerce releases, and the
+	// feature is still flag-gated in some of them. Skip silently when unavailable.
+	if ( ! is_callable( [ $variation, 'get_gallery_image_ids' ] ) ) {
+		return [];
+	}
+
+	$attachment_ids = $variation->get_gallery_image_ids();
+
+	if ( ! is_array( $attachment_ids ) || empty( $attachment_ids ) ) {
+		return [];
+	}
+
+	$images = [];
+
+	foreach ( $attachment_ids as $attachment_id ) {
+		$image_src = wp_get_attachment_image_src( (int) $attachment_id, 'full' );
+
+		// Skip attachments WooCommerce cannot resolve to a usable URL.
+		if ( ! is_array( $image_src ) || empty( $image_src[0] ) ) {
+			continue;
+		}
+
+		$images[] = $image_src[0];
+
+		// Google accepts at most 10 additional images per item.
+		if ( count( $images ) >= 10 ) {
+			break;
+		}
+	}
+
+	// Only report a gallery that is genuinely a list; a single extra image adds
+	// nothing the item's own image_link does not already cover.
+	return count( $images ) > 1 ? $images : [];
 }
 
 /**
