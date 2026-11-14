@@ -103,7 +103,13 @@ function LSWCF_product_feed_callback() {
 				$title =        [ $product->post_title, LSWCF_get_variation_title( $product->post_title, $variation_obj ) ];
 				$stock =        LSWCF_get_stock_data( $variation_obj );
 				$image_link =   strlen( $variation_image ) > 0 ? $variation_image : $parent_image_link;
-				$additional_images = LSWCF_get_additional_images( $variation_obj );
+				$additional_images = LSWCF_get_additional_images( $variation_obj, $product_obj, $image_link );
+
+				// With neither a variation nor a parent image, WooCommerce shows the first
+				// gallery image instead. Do the same so image_link is never empty.
+				if ( strlen( $image_link ) == 0 && ! empty( $additional_images ) ) {
+					$image_link = array_shift( $additional_images );
+				}
 				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
 				$id =           $variation_obj->get_id();
@@ -125,7 +131,8 @@ function LSWCF_product_feed_callback() {
 		}
 
 		// Write one product to the output.
-		$output .= LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false );
+		$additional_images = LSWCF_get_additional_images( $product_obj, null, $image_link );
+		$output .= LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false, $additional_images );
 	}
 
 	// Echo footer for RSS feed & return data.
@@ -195,7 +202,7 @@ function LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $pr
 	$output .= "\t\t\t" . '<g:description><![CDATA[' . esc_html( $description ) . ']]></g:description>' . PHP_EOL;
 	$output .= "\t\t\t" . '<g:image_link>' . esc_url( $image_link ) . '</g:image_link>' . PHP_EOL;
 
-	// Additional images are only emitted when the item carries its own gallery.
+	// Additional images are emitted whenever the item resolves a gallery.
 	foreach ( $additional_images as $additional_image ) {
 		$output .= "\t\t\t" . '<g:additional_image_link>' . esc_url( $additional_image ) . '</g:additional_image_link>' . PHP_EOL;
 	}
@@ -384,27 +391,38 @@ function LSWCF_get_attribute_label( $name, $value ) {
 }
 
 /**
- * Collect a variation's own gallery images for use as additional_image_link entries.
+ * Collect an item's gallery images for use as additional_image_link entries.
  *
- * Only images attached to the variation itself are returned; the parent product's
- * gallery is never used as a fallback. A variation without its own gallery yields an
- * empty array, so no additional_image_link elements are emitted for it. A variation
- * with a single gallery image is treated the same way: one extra image is not a list.
+ * A variation falls back to the parent product's gallery when it has none of its
+ * own, which is how WooCommerce itself decides which images a variation shows.
+ * This keeps additional images available on every item instead of only on the
+ * ones that happen to carry their own gallery.
+ *
+ * An image already used as the item's main image is dropped so image_link is not
+ * repeated. A single gallery image is still emitted: Google accepts between 1 and
+ * 10 extra links.
  *
  * @since 1.4.3
  *
- * @param WC_Product $variation A woocommerce variation object.
- * @return array A list of image URLs when the variation has two or more gallery
- *               images, capped at the 10 that Google accepts.
+ * @param WC_Product      $product The product or variation the item is built from.
+ * @param WC_Product|null $parent The variable product a variation belongs to, if any.
+ * @param string          $main_image The item's resolved main image URL, if any.
+ * @return array A list of image URLs, capped at the 10 that Google accepts.
  */
-function LSWCF_get_additional_images( $variation ) {
-	// Variation galleries are only exposed by newer WooCommerce releases, and the
-	// feature is still flag-gated in some of them. Skip silently when unavailable.
-	if ( ! is_callable( [ $variation, 'get_gallery_image_ids' ] ) ) {
+function LSWCF_get_additional_images( $product, $parent = null, $main_image = '' ) {
+	// Gallery accessors are only exposed by newer WooCommerce releases, and the
+	// variation gallery feature is still flag-gated in some of them. Skip silently
+	// when unavailable.
+	if ( ! is_callable( [ $product, 'get_gallery_image_ids' ] ) ) {
 		return [];
 	}
 
-	$attachment_ids = $variation->get_gallery_image_ids();
+	$attachment_ids = $product->get_gallery_image_ids();
+
+	// A variation without its own gallery shows the parent product's gallery.
+	if ( empty( $attachment_ids ) && $parent && is_callable( [ $parent, 'get_gallery_image_ids' ] ) ) {
+		$attachment_ids = $parent->get_gallery_image_ids();
+	}
 
 	if ( ! is_array( $attachment_ids ) || empty( $attachment_ids ) ) {
 		return [];
@@ -413,14 +431,18 @@ function LSWCF_get_additional_images( $variation ) {
 	$images = [];
 
 	foreach ( $attachment_ids as $attachment_id ) {
-		$image_src = wp_get_attachment_image_src( (int) $attachment_id, 'full' );
+		$image_url = LSWCF_get_image_url( $attachment_id );
 
-		// Skip attachments WooCommerce cannot resolve to a usable URL.
-		if ( ! is_array( $image_src ) || empty( $image_src[0] ) ) {
+		// Skip attachments WooCommerce cannot resolve, and never repeat the main image.
+		if ( strlen( $image_url ) == 0 || $image_url === $main_image ) {
 			continue;
 		}
 
-		$images[] = $image_src[0];
+		if ( in_array( $image_url, $images, true ) ) {
+			continue;
+		}
+
+		$images[] = $image_url;
 
 		// Google accepts at most 10 additional images per item.
 		if ( count( $images ) >= 10 ) {
@@ -428,9 +450,7 @@ function LSWCF_get_additional_images( $variation ) {
 		}
 	}
 
-	// Only report a gallery that is genuinely a list; a single extra image adds
-	// nothing the item's own image_link does not already cover.
-	return count( $images ) > 1 ? $images : [];
+	return $images;
 }
 
 /**
