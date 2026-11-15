@@ -103,12 +103,24 @@ function LSWCF_product_feed_callback() {
 				$title =        [ $product->post_title, LSWCF_get_variation_title( $product->post_title, $variation_obj ) ];
 				$stock =        LSWCF_get_stock_data( $variation_obj );
 				$image_link =   strlen( $variation_image ) > 0 ? $variation_image : $parent_image_link;
-				$additional_images = LSWCF_get_additional_images( $variation_obj, $product_obj, $image_link );
+
+				// Only the variation's own gallery. The parent gallery routinely holds
+				// photos of sibling variants, which Google would show against this one.
+				$additional_images = LSWCF_get_additional_images( $variation_obj, $image_link );
 
 				// With neither a variation nor a parent image, WooCommerce shows the first
 				// gallery image instead. Do the same so image_link is never empty.
-				if ( strlen( $image_link ) == 0 && ! empty( $additional_images ) ) {
-					$image_link = array_shift( $additional_images );
+				if ( strlen( $image_link ) == 0 ) {
+					if ( ! empty( $additional_images ) ) {
+						$image_link = array_shift( $additional_images );
+					}
+					else {
+						$parent_gallery = LSWCF_get_additional_images( $product_obj );
+
+						if ( ! empty( $parent_gallery ) ) {
+							$image_link = array_shift( $parent_gallery );
+						}
+					}
 				}
 				$price =        LSWCF_get_price_data( $variation_obj, $region );
 				$sku =          [ $product_obj->get_sku(), $variation_obj->get_sku() ];
@@ -131,7 +143,7 @@ function LSWCF_product_feed_callback() {
 		}
 
 		// Write one product to the output.
-		$additional_images = LSWCF_get_additional_images( $product_obj, null, $image_link );
+		$additional_images = LSWCF_get_additional_images( $product_obj, $image_link );
 		$output .= LSWCF_emit_single( $title, $description, $sku, $image_link, $color, $price, $stock, $id, [], $region, $gpid, false, $additional_images );
 	}
 
@@ -393,10 +405,11 @@ function LSWCF_get_attribute_label( $name, $value ) {
 /**
  * Collect an item's gallery images for use as additional_image_link entries.
  *
- * A variation falls back to the parent product's gallery when it has none of its
- * own, which is how WooCommerce itself decides which images a variation shows.
- * This keeps additional images available on every item instead of only on the
- * ones that happen to carry their own gallery.
+ * Only the gallery of the item being emitted is used. A variation never borrows
+ * the parent product's gallery: that gallery commonly holds photos of sibling
+ * variations, and attaching it would show those photos against this variant in
+ * Google Merchant Center. A variation without a gallery of its own simply gets
+ * no additional images.
  *
  * An image already used as the item's main image is dropped so image_link is not
  * repeated. A single gallery image is still emitted: Google accepts between 1 and
@@ -404,12 +417,11 @@ function LSWCF_get_attribute_label( $name, $value ) {
  *
  * @since 1.4.3
  *
- * @param WC_Product      $product The product or variation the item is built from.
- * @param WC_Product|null $parent The variable product a variation belongs to, if any.
- * @param string          $main_image The item's resolved main image URL, if any.
+ * @param WC_Product $product The product or variation the item is built from.
+ * @param string     $main_image The item's resolved main image URL, if any.
  * @return array A list of image URLs, capped at the 10 that Google accepts.
  */
-function LSWCF_get_additional_images( $product, $parent = null, $main_image = '' ) {
+function LSWCF_get_additional_images( $product, $main_image = '' ) {
 	// Gallery accessors are only exposed by newer WooCommerce releases, and the
 	// variation gallery feature is still flag-gated in some of them. Skip silently
 	// when unavailable.
@@ -418,11 +430,6 @@ function LSWCF_get_additional_images( $product, $parent = null, $main_image = ''
 	}
 
 	$attachment_ids = $product->get_gallery_image_ids();
-
-	// A variation without its own gallery shows the parent product's gallery.
-	if ( empty( $attachment_ids ) && $parent && is_callable( [ $parent, 'get_gallery_image_ids' ] ) ) {
-		$attachment_ids = $parent->get_gallery_image_ids();
-	}
 
 	if ( ! is_array( $attachment_ids ) || empty( $attachment_ids ) ) {
 		return [];

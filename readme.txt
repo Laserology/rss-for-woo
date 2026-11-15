@@ -45,7 +45,7 @@ To add the property, search how to enable the "custom fields" menu from the scre
 
 == Changelog ==
 = 1.4.3 =
-* Report a variation's gallery images as additional image links, falling back to the parent product's gallery when the variation has none of its own.
+* Report a variation's own gallery images as additional image links, never the parent product's gallery, so sibling variants' photos don't leak between items.
 * Emit single-image galleries too, since Google accepts one to ten additional images per item.
 * Report gallery images on simple products as additional image links.
 * Include variation attribute values in variation titles so variants are distinguishable.
