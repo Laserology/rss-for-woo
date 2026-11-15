@@ -45,12 +45,15 @@ To add the property, search how to enable the "custom fields" menu from the scre
 
 == Changelog ==
 = 1.4.3 =
-* Report a variation's own gallery images as additional image links, never the parent product's gallery, so sibling variants' photos don't leak between items.
+* Emit gallery images as additional image links for simple products and variations, capped at the ten Google accepts.
+* Report only a variation's own gallery images, never the parent product's gallery, so sibling variants' photos don't leak between items.
 * Emit single-image galleries too, since Google accepts one to ten additional images per item.
-* Report gallery images on simple products as additional image links.
 * Include variation attribute values in variation titles so variants are distinguishable.
-* Give variations without a SKU their own item ID instead of reusing the parent SKU.
-* Fall back to the parent product image for variations without one, and stop emitting a PHP warning when an image is missing.
+* Give variations without a SKU their own item ID derived from their attributes, and keep colliding siblings distinct.
+* Use the product ID as the item ID when a simple product has no SKU.
+* Fall back to the parent product image for variations without one.
+* Stop emitting a PHP warning and an unusable image link when an attachment is missing.
+* Emit the color field in the Google namespace (g:color) so color variants are recognised.
 
 = 1.4.2 =
 * Updated for WordPress 7.1 compatibility.
